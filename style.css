@@ -41,6 +41,12 @@ button {
     margin: 30px 20px 30px 10px;
 }
 
+.clearfix {
+    content: '';
+    display: table;
+    clear: both;
+}
+
 .header-container {
     background-color: #cbc2be;
     height: 100%;
@@ -63,4 +69,14 @@ button {
     background-color: #333e49;
     color: white;
     margin: 40px 20px 0 20px;
+}
+
+.card i {
+    color: gold;
+}
+
+.flag {
+    width: 20px;
+    height: 15px;
+    margin-left: 10px;
 }

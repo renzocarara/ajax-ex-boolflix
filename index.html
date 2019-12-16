@@ -14,7 +14,7 @@
 <body>
 
     <header>
-        <div class="container header-container">
+        <div class="container header-container clearfix">
             <h1>Boolflix</h1>
             <button id="search-button">Send</button>
             <input id="search-input" type="text" placeholder="Search here...">
@@ -31,12 +31,17 @@
         {{!-- template per la creazione delle info estratte da TheMovieDB --}}
         <ol class="card">
             <li>Titolo: {{ title }}</li>
-            <li>Titolo Originale: {{ original_title }}</li>
-            <li>Lingua: {{ original_language }}</li>
-            <li>Voto: {{ vote_average }}</li>
+            <li>Titolo Originale: {{ original-title }}</li>
+            <li>Lingua: {{ original-language }}<span><img class="flag" src="images/{{ nation }}.svg" alt=""></span></li>
+            <li>Voto: {{ vote-average }}</li>
+            <li>Stelle:
+                <i class="fa{{ stars.star1 }} fa-star"></i>
+                <i class="fa{{ stars.star2 }} fa-star"></i>
+                <i class="fa{{ stars.star3 }} fa-star"></i>
+                <i class="fa{{ stars.star4 }} fa-star"></i>
+                <i class="fa{{ stars.star5 }} fa-star"></i>
+            </li>
         </ol>
-
-        </div>
     </script>
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
