@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="it">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.11.2/css/all.css" integrity="sha384-KA6wR/X5RY4zFAHpv/CnoG2UW1uogYfdnP67Uv7eULvTveboZJg0qUpmJZb5VqzN" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/handlebars@latest/dist/handlebars.js"></script>
+    <title>Booolean class#8 - Boolflix - interrogazione TheMovieDB</title>
+</head>
+
+<body>
+
+    <header>
+        <div class="container header-container">
+            <h1>Boolflix</h1>
+            <button id="search-button">Send</button>
+            <input id="search-input" type="text" placeholder="Search here...">
+        </div>
+    </header>
+
+    <main>
+        <div class="container cards-container">
+            <!-- parte grafica generata dinamicamente con i dati recuperati da TheMovieDB -->
+        </div>
+    </main>
+
+    <script id="card-template" type="text/x-handlebars-template">
+        {{!-- template per la creazione delle info estratte da TheMovieDB --}}
+        <ol class="card">
+            <li>Titolo: {{ title }}</li>
+            <li>Titolo Originale: {{ original_title }}</li>
+            <li>Lingua: {{ original_language }}</li>
+            <li>Voto: {{ vote_average }}</li>
+        </ol>
+
+        </div>
+    </script>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="main.js"></script>
+
+</body>
+
+</html>
