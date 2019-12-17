@@ -133,11 +133,24 @@ function handleResponse(data, endpoint) {
 
 
 function createImgLink(posterLink) {
-    var imgUrlStart = 'https://image.tmdb.org/t/p/'; // indirizzo base per lel immagini
-    var imgUrlSize = 'w342/'; // dimensione dell'immagine
-    var imgUrlEnd = posterLink; // indirizzo specifico dell'immagine corrente
+    // crea il path completo per recuperare l'immagine (poster) del film/serie tv
+    // gestisce il caso in cui il poster non è disponibile
 
-    return imgUrlStart + imgUrlSize + imgUrlEnd;
+    var imgUrlStart = 'https://image.tmdb.org/t/p/'; // indirizzo base per lel immagini
+    var imgUrlSize = 'w92/'; // dimensione dell'immagine
+    var imgUrlEnd = posterLink; // indirizzo specifico dell'immagine corrente
+    var wholePath = "";
+
+    if (imgUrlEnd == null) {
+        // caso limite in cui l'API mi risponde con un path "null", non c'è il poster
+        // in questo caso utilizzo un immagine di default
+        wholePath = "images/default_poster.png";
+    } else {
+        // compongo il path con le parti fisse + il path parziale recuperato con l'API
+        wholePath = imgUrlStart + imgUrlSize + imgUrlEnd;
+    }
+
+    return wholePath;
 }
 
 function createFlag(lang) {

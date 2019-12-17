@@ -50,7 +50,7 @@ button {
 }
 
 .header-container {
-    background-color: #cbc2be;
+    background-color: black;
     height: 100%;
 }
 
@@ -58,19 +58,21 @@ button {
     display: flex;
     justify-content: center;
     flex-wrap: wrap;
-    background-color: #eeebe8;
+    background-color: #343534;
     /* altezza viewport - altezza header */
     min-height: calc(100vh - 80px);
     padding-bottom: 40px;
 }
 
 .card {
+    border: 1px solid white;
     height: 513px;
     width: 342px;
     padding: 20px;
     background-color: #333e49;
     color: white;
     margin: 40px 20px 0 20px;
+    overflow-y: auto;
 }
 
 .card i {
@@ -89,6 +91,6 @@ i.grayed {
 }
 
 .poster {
-    /* max-height: 513px;
-    max-width: 342px; */
+    /* max-height: 513px; */
+    /* max-width: 342px;  */
 }
