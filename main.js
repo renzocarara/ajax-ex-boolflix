@@ -128,17 +128,18 @@ function handleResponse(data, endpoint) {
 function createFlag(lang) {
     // crea il codice HTML da inserire nel template di HANDLEBARS
     // scorre un array con l'elenco delle bandierine disponibili
-    // restituisec il codice per visualizzare la bandierina o del semplice testo
+    // restituisce il codice per visualizzare la bandierina o del semplice testo
     // se un'immagine della bandierina non è disponibile
 
-    availableFlags = ['bg', 'cn', 'cz', 'de', 'dk', 'en', 'es', 'et', 'fi', 'fr', 'gr', 'hr', 'hu', 'in', 'is', 'it', 'jp', 'lv', 'nl', 'no', 'pl', 'pt', 'ro', 'rs', 'ru', 'si', 'sv', 'tr', 'ua'];
-    var flagOrText; // pararametro di ritorno della funzione
+    // array con le lingue per cui è disponibile una bandierina da visualizare
+    availableFlags = ['bg', 'cn', 'cz', 'de', 'dk', 'en', 'es', 'et', 'fi', 'fr', 'gr', 'hr', 'hu', 'in', 'is', 'it', 'ja', 'lv', 'nl', 'no', 'pl', 'pt', 'ro', 'rs', 'ru', 'si', 'sv', 'tr', 'ua'];
+    var flagOrText; // valore di ritorno della funzione
 
     if (availableFlags.includes(lang)) {
-        // la bandierina per quel linguaggio è disponibile, costruisco un tag <img>
+        // la bandierina per quel linguaggio è disponibile, costruisco un elemento <img>
         flagOrText = '<img class="flag" src="images/' + lang + '.svg" ' + 'alt="ISO 639-1: ' + lang + '">';
     } else {
-        // la bandierina per quel linguaggio non è disponibile, restituisco solo testo
+        // la bandierina per quel linguaggio non è disponibile, restituisco solo testo (il codice lingua)
         flagOrText = lang;
     }
 
@@ -146,30 +147,23 @@ function createFlag(lang) {
 } // end createFlag function
 
 function createStars(vote) {
-    // creo un oggetto per HANDLEBARS, ha 5 proprietà che rappresentano le 5 stelle da visualizzare
-    // la proprietà ha valore 'r' o 's' e serve a completare il nome della classe di fontawesome
-    // associata ad una stella piena o vuota
+    // crea il codice HTML da inserire nel template di HANDLEBARS
+    // restituisce il codice HTML per visualizzare le stelle
 
     var starsCounter = Math.round(vote / 2); // numero di stelle piene da visualizzare
-    var fullStar = 's'; // identifica la classe stella piena
-    var emptyStar = 'r'; // identifica la classe stella vuota
+    var fullStar = '<i class="fas fa-star"></i>'; // stella piena
+    var emptyStar = '<i class="far fa-star grayed"></i>'; // stella vuota
+    var stars = ""; // valore ritornato dalla funzione
 
-    // inizializzo l'oggetto stars con 5 stelle vuote
-    var stars = {
-        star1: emptyStar,
-        star2: emptyStar,
-        star3: emptyStar,
-        star4: emptyStar,
-        star5: emptyStar
-    };
-
-    // ciclo sull'oggetto e inserisco le stelle piene in base a starsCounter
-    for (var key in stars) {
+    // ciclo sempre 5 volte e inserisco le stelle piene o vuote in base a starsCounter
+    for (var i = 0; i < 5; i++) {
         if (starsCounter > 0) {
-            stars[key] = fullStar; // aggiungo una stella piena
+            stars += fullStar; // aggiungo una stella piena
             starsCounter--; // decremento il contatore delle stelle
-        } // end for
-    }
+        } else {
+            stars += emptyStar; // aggiungo una stella vuota
+        }
+    } // end for
 
     return stars;
 } // end createStars function
