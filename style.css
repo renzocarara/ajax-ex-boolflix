@@ -27,8 +27,9 @@ h1 {
 
 input {
     float: right;
-    margin: 30px 0;
+    margin: 24px 0;
     width: 300px;
+    padding: 6px 12px;
 }
 
 /* elimino bordo sull'input quando ha il focus */
@@ -38,7 +39,8 @@ input:focus {
 
 button {
     float: right;
-    margin: 30px 20px 30px 10px;
+    margin: 24px 20px 30px 10px;
+    padding: 6px 12px;
 }
 
 .clearfix {
@@ -79,4 +81,5 @@ button {
     width: 20px;
     height: 15px;
     margin-left: 10px;
+    vertical-align: text-bottom;
 }

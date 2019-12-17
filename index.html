@@ -16,14 +16,14 @@
     <header>
         <div class="container header-container clearfix">
             <h1>Boolflix</h1>
-            <button id="search-button">Send</button>
-            <input id="search-input" type="text" placeholder="Search here...">
+            <button id="search-button">Cerca</button>
+            <input id="search-input" type="text" placeholder="Scrivi qui...">
         </div>
     </header>
 
     <main>
         <div class="container cards-container">
-            <!-- parte grafica generata dinamicamente con i dati recuperati da TheMovieDB -->
+            <!-- parte grafica generata dinamicamente con i dati recuperati da TMDB -->
         </div>
     </main>
 
@@ -32,7 +32,7 @@
         <ol class="card">
             <li>Titolo: {{ title }}</li>
             <li>Titolo Originale: {{ original-title }}</li>
-            <li>Lingua: {{ original-language }}<span><img class="flag" src="images/{{ nation }}.svg" alt=""></span></li>
+            <li>Lingua: {{{ flag-image }}}</li>
             <li>Voto: {{ vote-average }}</li>
             <li>Stelle:
                 <i class="fa{{ stars.star1 }} fa-star"></i>

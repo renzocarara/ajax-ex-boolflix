@@ -1,5 +1,11 @@
 // Nome repo: ajax-ex-boolflix
 // -----------------------------------------------------------------------------
+
+// ---------------------------- CONSTANTs --------------------------------------
+// variabili globali che non cambiano valore durante l'esecuzione dello script (costanti)
+
+
+
 $(document).ready(function() {
 
     //intercetto click su bottone per la ricerca
@@ -10,7 +16,7 @@ $(document).ready(function() {
         }
     }); // end evento click su bottone send
 
-    // intercetto pressione ENTER, anzichè click su bottone, per iniziare ricerca
+    // intercetto pressione ENTER, anzichè click sul bottone, per iniziare ricerca
     $('#search-input').keypress(function(event) {
         if (event.which == 13) { // è stato premuto tasto ENTER (codice 13)
             var searchInput = $('#search-input').val(); // recupero la stringa da ricercare
@@ -22,7 +28,7 @@ $(document).ready(function() {
 
 // ---------------------------- FUNCTIONs --------------------------------------
 function handleUserSearch(searchString) {
-    // verifico se c'è una stringa da ricercare  enel caso faccio una chiamata AJAX
+    // verifica se c'è una stringa da ricercare e nel caso faccio una chiamata AJAX
 
     var APIurl = 'https://api.themoviedb.org/3';
     var APIendpointMovie = '/search/movie';
@@ -38,6 +44,8 @@ function handleUserSearch(searchString) {
         callAJAX(APIurl, APIendpointTV, APIkey, searchString, lang);
         //resetto il campo di input inserendo una stringa vuota
         $('#search-input').val("");
+        // svuoto il contenitore delle cards sulla pagina HTML
+        $('.cards-container').empty();
     }
 } // end function
 
@@ -53,7 +61,7 @@ function callAJAX(url, endpoint, key, query, lang) {
         },
         method: 'get',
         success: function(response) {
-            handleResponse(response.results, endpoint);
+            handleResponse(response, endpoint);
         },
         error: function() {
             alert("ERROR! there's a problem...");
@@ -67,55 +75,78 @@ function handleResponse(data, endpoint) {
     // creo un oggetto per HANDLEBARS
     // appendo in pagina il codice HTML generato
 
-    var title; // titolo del film o della serie TV
-    var original_title; // titolo originale del film o della serie TV
+    if (data.total_results > 0) { // ci sono dei risultati da elaborare
 
-    // recupero il codice html dal template HANDLEBARS
-    var cardTemplate = $('#card-template').html();
-    // compilo il template HANDLEBARS, lui mi restituisce un funzione
-    var cardFunction = Handlebars.compile(cardTemplate);
+        var APIendpointMovie = '/search/movie'; // identifica un tipo di chiamata API
+        var title; // titolo del film o della serie TV
+        var original_title; // titolo originale del film o della serie TV
+        var results = data.results; // estraggo la parte di risultati che mi interessa
 
-    // ciclo su tutto l'array composto dai dati ricevuti dal server
-    for (var i = 0; i < data.length; i++) {
+        // recupero il codice html dal template HANDLEBARS
+        var cardTemplate = $('#card-template').html();
+        // compilo il template HANDLEBARS, lui mi restituisce un funzione
+        var cardFunction = Handlebars.compile(cardTemplate);
 
-        // chiamo una funzione che mi trasforma il voto da 1 a 10 in un intero da 1 a 5
-        // e poi mi restituisce un ogetto con 5 proprietà che corrispondono alle 5 stelle
-        var starsObj = createStars(data[i].vote_average);
+        // ciclo su tutto l'array composto dai dati ricevuti dal server
+        for (var i = 0; i < results.length; i++) {
 
-        // distinguo a seconda se è un movie o una TV series
-        if (endpoint == "/search/movie") {
-            // ramo MOVIES
-            console.log("MOVIE");
-            title = data[i].title;
-            original_title = data[i].original_title;
-        } else {
-            // ramo TV SERIES
-            console.log("TV");
-            title = data[i].name;
-            original_title = data[i].original_name;
-        }
+            // distinguo a seconda se è un movie o una TV series
+            if (endpoint == APIendpointMovie) {
+                // ramo MOVIES
+                console.log("MOVIE");
+                title = results[i].title;
+                original_title = results[i].original_title;
+            } else {
+                // ramo TV SERIES
+                console.log("TV");
+                title = results[i].name;
+                original_title = results[i].original_name;
+            }
 
-        // creo un oggetto con i dati da inserire in pagina
-        var context = {
-            'title': title,
-            'original-title': original_title,
-            'original-language': data[i].original_language,
-            'nation': data[i].original_language,
-            'vote-average': data[i].vote_average,
-            'stars': starsObj
-        };
+            // creo un oggetto con i dati da inserire in pagina
+            var context = {
+                'title': title,
+                'original-title': original_title,
+                // 'original-language': results[i].original_language,
+                'flag-image': createFlag(results[i].original_language),
+                'vote-average': results[i].vote_average,
+                'stars': createStars(results[i].vote_average)
+            };
 
-        // chiamo la funzione generata da HANDLEBARS per popolare il template
-        var card = cardFunction(context);
+            // chiamo la funzione generata da HANDLEBARS per popolare il template
+            var card = cardFunction(context);
 
-        // aggiungo nella mia pagina il codice HTML generato da HANDLEBARS
-        $('.cards-container').append(card);
+            // aggiungo nella mia pagina il codice HTML generato da HANDLEBARS
+            $('.cards-container').append(card);
 
-    } // end for
+        } // end for
+
+    } // end if su data.total_results>0
+
 } // end handleResponse function
 
+function createFlag(lang) {
+    // crea il codice HTML da inserire nel template di HANDLEBARS
+    // scorre un array con l'elenco delle bandierine disponibili
+    // restituisec il codice per visualizzare la bandierina o del semplice testo
+    // se un'immagine della bandierina non è disponibile
+
+    availableFlags = ['bg', 'cn', 'cz', 'de', 'dk', 'en', 'es', 'et', 'fi', 'fr', 'gr', 'hr', 'hu', 'in', 'is', 'it', 'jp', 'lv', 'nl', 'no', 'pl', 'pt', 'ro', 'rs', 'ru', 'si', 'sv', 'tr', 'ua'];
+    var flagOrText; // pararametro di ritorno della funzione
+
+    if (availableFlags.includes(lang)) {
+        // la bandierina per quel linguaggio è disponibile, costruisco un tag <img>
+        flagOrText = '<img class="flag" src="images/' + lang + '.svg" ' + 'alt="ISO 639-1: ' + lang + '">';
+    } else {
+        // la bandierina per quel linguaggio non è disponibile, restituisco solo testo
+        flagOrText = lang;
+    }
+
+    return flagOrText;
+} // end createFlag function
+
 function createStars(vote) {
-    // creo un oggetto per HANDLEBARS, ha 5 proprità che rappresentano le 5 stelle da visualizzare
+    // creo un oggetto per HANDLEBARS, ha 5 proprietà che rappresentano le 5 stelle da visualizzare
     // la proprietà ha valore 'r' o 's' e serve a completare il nome della classe di fontawesome
     // associata ad una stella piena o vuota
 
