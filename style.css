@@ -65,8 +65,8 @@ button {
 }
 
 .card {
-    height: 350px;
-    width: 200px;
+    height: 513px;
+    width: 342px;
     padding: 20px;
     background-color: #333e49;
     color: white;
@@ -77,6 +77,10 @@ button {
     color: gold;
 }
 
+i.grayed {
+    color: lightgray;
+}
+
 .flag {
     width: 20px;
     height: 15px;
@@ -84,6 +88,7 @@ button {
     vertical-align: text-bottom;
 }
 
-i.grayed {
-    color: lightgray;
+.poster {
+    /* max-height: 513px;
+    max-width: 342px; */
 }

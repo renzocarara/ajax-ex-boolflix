@@ -47,7 +47,8 @@ function handleUserSearch(searchString) {
         // svuoto il contenitore delle cards sulla pagina HTML
         $('.cards-container').empty();
     }
-} // end function
+} // fine funzione handleUserSearch()
+
 
 function callAJAX(url, endpoint, key, query, lang) {
     // chiamata AJAX usando i parametri in ingresso alla funzione
@@ -67,17 +68,18 @@ function callAJAX(url, endpoint, key, query, lang) {
             alert("ERROR! there's a problem...");
         }
     }); // end AJAX call
-} // end callAJAX function
+} // fine funzione callAJAX()
 
 
 function handleResponse(data, endpoint) {
     // estraggo i dati che mi interessano dalla risposta ricevuta dall'API
-    // creo un oggetto per HANDLEBARS
-    // appendo in pagina il codice HTML generato
+    // creo un oggetto per HANDLEBARS per valorizzare il template
+
 
     if (data.total_results > 0) { // ci sono dei risultati da elaborare
 
-        var APIendpointMovie = '/search/movie'; // identifica un tipo di chiamata API
+        var APIendpointMovie = '/search/movie'; // endpoint dell'API
+        var APIendpointTV = '/search/tv'; // endpoint dell'API
         var title; // titolo del film o della serie TV
         var original_title; // titolo originale del film o della serie TV
         var results = data.results; // estraggo la parte di risultati che mi interessa
@@ -93,24 +95,22 @@ function handleResponse(data, endpoint) {
             // distinguo a seconda se è un movie o una TV series
             if (endpoint == APIendpointMovie) {
                 // ramo MOVIES
-                console.log("MOVIE");
                 title = results[i].title;
                 original_title = results[i].original_title;
             } else {
                 // ramo TV SERIES
-                console.log("TV");
                 title = results[i].name;
                 original_title = results[i].original_name;
             }
 
-            // creo un oggetto con i dati da inserire in pagina
+            // creo un oggetto per HANDLEBARS con i dati da inserire in pagina
             var context = {
                 'title': title,
                 'original-title': original_title,
-                // 'original-language': results[i].original_language,
                 'flag-image': createFlag(results[i].original_language),
-                'vote-average': results[i].vote_average,
-                'stars': createStars(results[i].vote_average)
+                'stars': createStars(results[i].vote_average),
+                'img-link': createImgLink(results[i].poster_path),
+                'overview': results[i].overview
             };
 
             // chiamo la funzione generata da HANDLEBARS per popolare il template
@@ -121,9 +121,24 @@ function handleResponse(data, endpoint) {
 
         } // end for
 
-    } // end if su data.total_results>0
+        // da rivedere il caso in cui la 1a AJAX call non da risultati e la seconda invece si
+        // } else {
+        //
+        //     if ($('.cards-container').html() == "") {
+        //         $('.cards-container').append("Non ci sono risultati");
+        //     }
+    }
 
-} // end handleResponse function
+} // fine funzione handleResponse()
+
+
+function createImgLink(posterLink) {
+    var imgUrlStart = 'https://image.tmdb.org/t/p/'; // indirizzo base per lel immagini
+    var imgUrlSize = 'w342/'; // dimensione dell'immagine
+    var imgUrlEnd = posterLink; // indirizzo specifico dell'immagine corrente
+
+    return imgUrlStart + imgUrlSize + imgUrlEnd;
+}
 
 function createFlag(lang) {
     // crea il codice HTML da inserire nel template di HANDLEBARS
@@ -144,7 +159,7 @@ function createFlag(lang) {
     }
 
     return flagOrText;
-} // end createFlag function
+} // fine funzione createFlag()
 
 function createStars(vote) {
     // crea il codice HTML da inserire nel template di HANDLEBARS
@@ -166,4 +181,4 @@ function createStars(vote) {
     } // end for
 
     return stars;
-} // end createStars function
+} // fine funzione createStars()
