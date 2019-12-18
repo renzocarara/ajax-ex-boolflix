@@ -114,8 +114,10 @@ function handleResponse(data, endpoint) {
         var APIendpointMovie = '/search/movie'; // endpoint dell'API
         var APIendpointTV = '/search/tv'; // endpoint dell'API
         var title; // titolo del film o della serie TV
+        var MovieOrTV; // distingue se FILM o SERIE TV
         var original_title; // titolo originale del film o della serie TV
         var results = data.results; // estraggo la parte di risultati che mi interessa
+
 
         // recupero il codice html dal template HANDLEBARS
         var cardTemplate = $('#card-template').html();
@@ -130,10 +132,12 @@ function handleResponse(data, endpoint) {
                 // ramo MOVIES
                 title = results[i].title;
                 original_title = results[i].original_title;
+                MovieOrTV = "Film";
             } else {
                 // ramo TV SERIES
                 title = results[i].name;
                 original_title = results[i].original_name;
+                MovieOrTV = "Serie TV";
             }
 
             // creo un oggetto per HANDLEBARS con i dati da inserire in pagina
@@ -143,23 +147,32 @@ function handleResponse(data, endpoint) {
                 'flag-image': createFlag(results[i].original_language),
                 'stars': createStars(results[i].vote_average),
                 'overview': createOverview(results[i].overview),
-                'poster': createImgLink(results[i].poster_path)
+                'poster': createImgLink(results[i].poster_path),
+                'type': MovieOrTV
             };
 
             // chiamo la funzione generata da HANDLEBARS per popolare il template
             var card = cardFunction(context);
 
-            // aggiungo nella mia pagina il codice HTML generato da HANDLEBARS
+            if ($('.cards-container').find('.card').length <= 0) {
+                console.log("ho risultati, ma potrebbe esserci msg, pulisco");
+                // non ci sono cards in pagina, ma potrebbe esserci il msg "nessun risultato" dell'altra chiamamta AJAX
+                // non so se la prima o la seconda, poichè sono asincrone!! ma quella che ha finito prima potrebbe
+                // non aver prodotto risultati e per cui potrei avere scritto in pagina "Non ci sono risultati"
+                // pulisco il contenitore delle cards da un eventuale messaggio che segnala nessun risultato
+                $('.cards-container').empty();
+            }
+            // aggiungo nella mia pagina le cards, ovvero il codice HTML generato da HANDLEBARS
             $('.cards-container').append(card);
 
         } // end for
 
-        // da rivedere il caso in cui la 1a AJAX call non da risultati e la seconda invece si
-        // } else {
-        //
-        //     if ($('.cards-container').html() == "") {
-        //         $('.cards-container').append("Non ci sono risultati");
-        //     }
+    } else {
+        // se la pagina è ancora vuota (non ci sono ne cards ne messaggi), inserisco il messaggio
+        if ($('.cards-container').text() == "") {
+            console.log("scrivo no results");
+            $('.cards-container').append("Non ci sono risultati!");
+        }
     }
 
 } // fine funzione handleResponse()
