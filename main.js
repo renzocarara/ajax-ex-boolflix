@@ -3,8 +3,8 @@
 
 // ---------------------------- CONSTANTs --------------------------------------
 // variabili globali che non cambiano valore durante l'esecuzione dello script (costanti)
-
-
+// array con le lingue per cui è disponibile una bandierina da visualizare
+availableFlags = ['bg', 'cn', 'cz', 'de', 'dk', 'en', 'es', 'et', 'fi', 'fr', 'gr', 'hr', 'hu', 'in', 'is', 'it', 'ja', 'lv', 'nl', 'no', 'pl', 'pt', 'ro', 'rs', 'ru', 'si', 'sv', 'tr', 'ua'];
 
 $(document).ready(function() {
 
@@ -27,30 +27,23 @@ $(document).ready(function() {
     // intercetto e gestisco eventi mouseenter e mouseleave su una card
     //uso la $(document).on poichè si tratta di elementi creati dinamicamente
     $(document).on("mouseenter", ".card", function() {
-        console.log("mouse enter");
-        // nascondo l'immagine poster, apparirà il testo sottostante
-        $(this).find('.poster').css({
-            "display": "none"
-        });
-        // abilito la scrollbar verticale, appare se necessaria per crollare il testo
-        $(this).css({
-            "overflow-y": "auto"
-        });
+
+        // nascondo l'immagine poster, rendendo così visibile il testo sottostante
+        $(this).find('.poster').hide();
+        // abilito la scrollbar verticale per scrollare il testo, appare solo se necessaria
+        $(this).addClass('enableScrollbarY');
 
 
     }).on("mouseleave", ".card", function() {
-        console.log("mouse leave");
 
+        // riporto lo scroll all'inizio, in caso l'utente avesse scrollato la card
+        $(this).scrollTop(0);
+        // disabilito la scrollbar verticale
+        $(this).removeClass('enableScrollbarY');
         // faccio riapparire l'immagine poster che mi copre il testo
-        $(this).find('.poster').css({
-            "display": "block"
-        });
-        // disabilito la scrollbar verticale, appare se necessaria
-        // per evitare che mi appaia mentre c'è visualizzata l'immagine e non il testo
-        $(this).css({
-            'overflow-y': 'hidden'
-        });
-    });
+        $(this).find('.poster').show();
+
+    }); // end eventi mouseenter e mouseleave
 
 
 }); // fine document ready
@@ -193,8 +186,6 @@ function createFlag(lang) {
     // restituisce il codice per visualizzare la bandierina o del semplice testo
     // se un'immagine della bandierina non è disponibile
 
-    // array con le lingue per cui è disponibile una bandierina da visualizare
-    availableFlags = ['bg', 'cn', 'cz', 'de', 'dk', 'en', 'es', 'et', 'fi', 'fr', 'gr', 'hr', 'hu', 'in', 'is', 'it', 'ja', 'lv', 'nl', 'no', 'pl', 'pt', 'ro', 'rs', 'ru', 'si', 'sv', 'tr', 'ua'];
     var flagOrText; // valore di ritorno della funzione
 
     if (availableFlags.includes(lang)) {
