@@ -4,7 +4,7 @@
 // ---------------------------- CONSTANTs --------------------------------------
 // variabili globali che non cambiano valore durante l'esecuzione dello script (costanti)
 // array con le lingue per cui è disponibile una bandierina da visualizare
-availableFlags = ['bg', 'cn', 'cs', 'de', 'dk', 'en', 'es', 'et', 'fi', 'fr', 'gr', 'hr', 'hu', 'in', 'is',
+availableFlags = ['bg', 'zh', 'cs', 'de', 'dk', 'en', 'es', 'et', 'fi', 'fr', 'gr', 'hr', 'hu', 'in', 'is',
     'it', 'ja', 'lv', 'nl', 'no', 'pl', 'pt', 'ro', 'ru', 'sl', 'sv', 'tr', 'ua'
 ];
 
@@ -169,19 +169,16 @@ function handleResponse(data, endpoint) {
 
     } else {
         // se la pagina è ancora completamente vuota (non ci sono cards ne tag), inserisco un tag "segnaposto"
+        // che mi servià se ripasso da queto ramo else al completamento della prossima chiamat AJAX
         if ($('.cards-container').html() == "") {
-            console.log("scrivo h3");
             // scrivo un tag <h3> per ricordarmi che la prima chiamata AJAX completata non ha prodotto risultati
             $('.cards-container').html('<h3></h3>');
         } else if ($('.cards-container').children('h3').length > 0) {
-            // al passaggio precedente non c'erano dati in pagina e ho scritto un tag <h3>, ora che
-            // nuovamente non ho dati da scrivere, lo valorizzo col messaggio di avviso
-            // se la condizione di questo 'if' non è vera, allora vuol dire che in pagina ho già delle cards visualizzate,
-            // quindi, anche se la chiamata AJAX appena terminata non ha prodoto risultai, non scrivo nulla in pagina
-            console.log("scrivo no results");
+            // al termine della precedente chiamata AJAX, non c'erano dati in pagina e ho scritto un tag <h3>,
+            // ora che nuovamente non ho dati da scrivere, lo valorizzo col messaggio di avviso
+            // se invece la condizione di questo 'else if' non è vera, allora vuol dire che in pagina ho già delle cards visualizzate,
+            // quindi, anche se la chiamata AJAX appena terminata non ha prodoto risultai, non scrivo il messaggio di avviso
             $('.cards-container h3').append("Non ci sono risultati!");
-        } else {
-            console.log("ho già delle card visualizzate");
         }
     }
 
