@@ -30,15 +30,23 @@ $(document).ready(function() {
         console.log("mouse enter");
         // nascondo l'immagine poster
         $(this).find('img').css({
-            "display": "none",
+            "display": "none"
         });
+
+        $(this).css({
+            "overflow-y": "auto"
+        });
+
 
     }).on("mouseleave", ".card", function() {
         console.log("mouse leave");
 
         // faccio riapparire l'immagine poster
         $(this).find('img').css({
-            "display": "block",
+            "display": "block"
+        });
+        $(this).css({
+            'overflow-y': 'hidden'
         });
     });
 

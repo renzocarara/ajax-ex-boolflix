@@ -73,7 +73,7 @@ button {
     background-color: #333e49;
     color: white;
     margin: 40px 20px 0 20px;
-    overflow-y: auto;
+    overflow-y: hidden;
 }
 
 .card li {
