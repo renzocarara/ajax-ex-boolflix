@@ -4,7 +4,9 @@
 // ---------------------------- CONSTANTs --------------------------------------
 // variabili globali che non cambiano valore durante l'esecuzione dello script (costanti)
 // array con le lingue per cui è disponibile una bandierina da visualizare
-availableFlags = ['bg', 'cn', 'cz', 'de', 'dk', 'en', 'es', 'et', 'fi', 'fr', 'gr', 'hr', 'hu', 'in', 'is', 'it', 'ja', 'lv', 'nl', 'no', 'pl', 'pt', 'ro', 'rs', 'ru', 'si', 'sv', 'tr', 'ua'];
+availableFlags = ['bg', 'cn', 'cs', 'de', 'dk', 'en', 'es', 'et', 'fi', 'fr', 'gr', 'hr', 'hu', 'in', 'is',
+    'it', 'ja', 'lv', 'nl', 'no', 'pl', 'pt', 'ro', 'ru', 'sl', 'sv', 'tr', 'ua'
+];
 
 $(document).ready(function() {
 
@@ -25,14 +27,16 @@ $(document).ready(function() {
     }); // end evento keypress tasto ENTER
 
     // intercetto e gestisco eventi mouseenter e mouseleave su una card
-    //uso la $(document).on poichè si tratta di elementi creati dinamicamente
+    // uso la $(document).on poichè si tratta di elementi creati dinamicamente
+    // uso notazione in cascata, concatenando i due eventi
     $(document).on("mouseenter", ".card", function() {
 
-        // nascondo l'immagine poster, rendendo così visibile il testo sottostante
-        $(this).find('.poster').hide();
+        if ($(this).find('.poster').length > 0) { // verifico se c'è il poster
+            // nascondo l'immagine poster, rendendo così visibile il testo sottostante
+            $(this).find('.poster').hide();
+        }
         // abilito la scrollbar verticale per scrollare il testo, appare solo se necessaria
         $(this).addClass('enableScrollbarY');
-
 
     }).on("mouseleave", ".card", function() {
 
@@ -40,8 +44,11 @@ $(document).ready(function() {
         $(this).scrollTop(0);
         // disabilito la scrollbar verticale
         $(this).removeClass('enableScrollbarY');
-        // faccio riapparire l'immagine poster che mi copre il testo
-        $(this).find('.poster').show();
+
+        if ($(this).find('.poster').length > 0) { // verifico se c'è il poster
+            // faccio riapparire l'immagine poster che mi va a coprire il testo
+            $(this).find('.poster').show();
+        }
 
     }); // end eventi mouseenter e mouseleave
 
@@ -50,7 +57,9 @@ $(document).ready(function() {
 
 // ---------------------------- FUNCTIONs --------------------------------------
 function handleUserSearch(searchString) {
-    // verifica se c'è una stringa da ricercare e nel caso faccio una chiamata AJAX
+    // DESCRIZIONE:
+    // verifica se c'è una stringa da ricercare e nel caso fa una chiamata AJAX
+    // dopodichè resetta il campo di ricerca e svuota il contenitore delle cards
 
     var APIurl = 'https://api.themoviedb.org/3';
     var APIendpointMovie = '/search/movie';
@@ -73,6 +82,7 @@ function handleUserSearch(searchString) {
 
 
 function callAJAX(url, endpoint, key, query, lang) {
+    // DESCRIZIONE:
     // chiamata AJAX usando i parametri in ingresso alla funzione
 
     $.ajax({
@@ -94,9 +104,10 @@ function callAJAX(url, endpoint, key, query, lang) {
 
 
 function handleResponse(data, endpoint) {
-    // estraggo i dati che mi interessano dalla risposta ricevuta dall'API
-    // creo un oggetto per HANDLEBARS per valorizzare il template
-
+    // DESCRIZIONE:
+    // estrae i dati che mi interessano dalla risposta ricevuta dall'API
+    // crea un oggetto per HANDLEBARS per valorizzare il template
+    // chiama diverse altre funzioni che preparano i singoli valori delle proprietà dell'oggetto
 
     if (data.total_results > 0) { // ci sono dei risultati da elaborare
 
@@ -132,7 +143,7 @@ function handleResponse(data, endpoint) {
                 'flag-image': createFlag(results[i].original_language),
                 'stars': createStars(results[i].vote_average),
                 'overview': createOverview(results[i].overview),
-                'img-link': createImgLink(results[i].poster_path)
+                'poster': createImgLink(results[i].poster_path)
             };
 
             // chiamo la funzione generata da HANDLEBARS per popolare il template
@@ -140,11 +151,6 @@ function handleResponse(data, endpoint) {
 
             // aggiungo nella mia pagina il codice HTML generato da HANDLEBARS
             $('.cards-container').append(card);
-
-            // inserisco l'immagine di copertina (poster) come background della card appena appesa in pagina
-            // var imgLink = createImgLink(results[i].poster_path);
-            // var darkBgi = "images/dark_background.png";
-            // $(".cards-container .card").last().css("backgroundImage", "url(" + imgLink + "), url(" + darkBgi + ")");
 
         } // end for
 
@@ -158,32 +164,32 @@ function handleResponse(data, endpoint) {
 
 } // fine funzione handleResponse()
 
-
 function createImgLink(posterLink) {
+    // DESCRIZIONE:
     // crea il path completo per recuperare l'immagine (poster) del film/serie tv
     // gestisce il caso in cui il poster non è disponibile
-    var defaultPoster = 'images/no_preview_poster.png';
+
+    // var defaultPoster = 'images/no_preview_poster.png';
     var imgUrlFixed = 'https://image.tmdb.org/t/p/'; // indirizzo base per lel immagini
     var imgUrlSize = 'w342/'; // dimensione dell'immagine
     var imgUrlVariable = posterLink; // indirizzo specifico dell'immagine richiesta tramite API
-    var wholePath = "";
+    var path = "";
 
-    if (imgUrlVariable == null) {
-        // caso limite in cui l'API mi risponde con un path "null", non c'è il poster
-        // in questo caso utilizzo un'immagine di default
-        wholePath = defaultPoster;
-    } else {
-        // compongo il path con le parti fisse + il path parziale recuperato con l'API
-        wholePath = imgUrlFixed + imgUrlSize + imgUrlVariable;
+    if (imgUrlVariable != null) {
+        // nel caso in cui l'API mi risponde con un path "null", non c'è il poster ritorno una stringa vuota
+        // compongo il path con le parte fissa + la dimensione + il path parziale recuperato con l'API
+        path = imgUrlFixed + imgUrlSize + imgUrlVariable;
+        path = '<li><img class="poster overlap" src="' + path + '"></li>';
     }
 
-    return wholePath;
+    return path;
 }
 
 function createFlag(lang) {
+    // DESCRIZIONE:
     // crea il codice HTML da inserire nel template di HANDLEBARS
     // scorre un array con l'elenco delle bandierine disponibili
-    // restituisce il codice per visualizzare la bandierina o del semplice testo
+    // restituisce il codice HTML per visualizzare la bandierina o del semplice testo
     // se un'immagine della bandierina non è disponibile
 
     var flagOrText; // valore di ritorno della funzione
@@ -200,6 +206,7 @@ function createFlag(lang) {
 } // fine funzione createFlag()
 
 function createStars(vote) {
+    // DESCRIZIONE:
     // crea il codice HTML da inserire nel template di HANDLEBARS
     // restituisce il codice HTML per visualizzare le stelle (5)
 
@@ -222,6 +229,10 @@ function createStars(vote) {
 } // fine funzione createStars()
 
 function createOverview(text) {
+    // DESCRIZIONE:
+    // estrae il dato "overview" dall'oggetto ottenuto in risposta dall'API e lo ritorna
+    // se l'overview è vuota ritorna la dicitura "non disponibile"
+
     var textToBeDisplayed; // overview da inserire in pagina
 
     if (text == "") {

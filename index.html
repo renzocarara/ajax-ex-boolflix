@@ -22,7 +22,7 @@
     </header>
 
     <main>
-        <div class="container cards-container clearfix">
+        <div class="container cards-container">
             <!-- parte grafica generata dinamicamente con i dati recuperati da TMDB -->
         </div>
     </main>
@@ -34,8 +34,8 @@
             <li><strong>Titolo Originale: </strong>{{ original-title }}</li>
             <li><strong>Lingua: </strong>{{{ flag-image }}}</li>
             <li><strong>Voto: </strong>{{{ stars }}}</li>
-            <li class="overview"><strong>Overview: </strong>{{ overview }}</li>
-            <li><img class="poster overlap" src="{{ img-link }}"></li>
+            <li><strong>Overview: </strong>{{ overview }}</li>
+            {{{ poster }}} {{!-- nel caso in cui non c'è un poster disponibile questo elemento non viene valorizzato --}}
         </ul>
     </script>
 
