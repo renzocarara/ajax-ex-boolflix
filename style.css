@@ -82,6 +82,7 @@ button {
 
 .card li {
     list-style-type: none;
+    padding-top: 10px;
 }
 
 .card i {
