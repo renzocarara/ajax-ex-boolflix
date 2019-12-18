@@ -28,11 +28,11 @@ $(document).ready(function() {
     //uso la $(document).on poichè si tratta di elementi creati dinamicamente
     $(document).on("mouseenter", ".card", function() {
         console.log("mouse enter");
-        // nascondo l'immagine poster
-        $(this).find('img').css({
+        // nascondo l'immagine poster, apparirà il testo sottostante
+        $(this).find('.poster').css({
             "display": "none"
         });
-
+        // abilito la scrollbar verticale, appare se necessaria per crollare il testo
         $(this).css({
             "overflow-y": "auto"
         });
@@ -41,10 +41,12 @@ $(document).ready(function() {
     }).on("mouseleave", ".card", function() {
         console.log("mouse leave");
 
-        // faccio riapparire l'immagine poster
-        $(this).find('img').css({
+        // faccio riapparire l'immagine poster che mi copre il testo
+        $(this).find('.poster').css({
             "display": "block"
         });
+        // disabilito la scrollbar verticale, appare se necessaria
+        // per evitare che mi appaia mentre c'è visualizzata l'immagine e non il testo
         $(this).css({
             'overflow-y': 'hidden'
         });
@@ -233,7 +235,7 @@ function createOverview(text) {
 
     if (text == "") {
         // non c'è una Overview
-        textToBeDisplayed = "not available";
+        textToBeDisplayed = "non disponibile";
     } else {
         textToBeDisplayed = text;
     }
