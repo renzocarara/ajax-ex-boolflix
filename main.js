@@ -154,24 +154,34 @@ function handleResponse(data, endpoint) {
             // chiamo la funzione generata da HANDLEBARS per popolare il template
             var card = cardFunction(context);
 
-            if ($('.cards-container').find('.card').length <= 0) {
-                console.log("ho risultati, ma potrebbe esserci msg, pulisco");
-                // non ci sono cards in pagina, ma potrebbe esserci il msg "nessun risultato" dell'altra chiamamta AJAX
-                // non so se la prima o la seconda, poichè sono asincrone!! ma quella che ha finito prima potrebbe
-                // non aver prodotto risultati e per cui potrei avere scritto in pagina "Non ci sono risultati"
-                // pulisco il contenitore delle cards da un eventuale messaggio che segnala nessun risultato
-                $('.cards-container').empty();
-            }
+            // if ($('.cards-container').find('.card').length <= 0) {
+            //     console.log("ho risultati, ma potrebbe esserci msg, pulisco");
+            //     // non ci sono cards in pagina, ma potrebbe esserci il msg "nessun risultato" dell'altra chiamamta AJAX
+            //     // non so se la prima o la seconda, poichè sono asincrone!! ma quella che ha finito prima potrebbe
+            //     // non aver prodotto risultati e per cui potrei avere scritto in pagina "Non ci sono risultati"
+            //     // pulisco il contenitore delle cards da un eventuale messaggio che segnala nessun risultato
+            //     $('.cards-container').empty();
+            // }
             // aggiungo nella mia pagina le cards, ovvero il codice HTML generato da HANDLEBARS
             $('.cards-container').append(card);
 
         } // end for
 
     } else {
-        // se la pagina è ancora vuota (non ci sono ne cards ne messaggi), inserisco il messaggio
-        if ($('.cards-container').text() == "") {
+        // se la pagina è ancora completamente vuota (non ci sono cards ne tag), inserisco un tag "segnaposto"
+        if ($('.cards-container').html() == "") {
+            console.log("scrivo h3");
+            // scrivo un tag <h3> per ricordarmi che la prima chiamata AJAX completata non ha prodotto risultati
+            $('.cards-container').html('<h3></h3>');
+        } else if ($('.cards-container').children('h3').length > 0) {
+            // al passaggio precedente non c'erano dati in pagina e ho scritto un tag <h3>, ora che
+            // nuovamente non ho dati da scrivere, lo valorizzo col messaggio di avviso
+            // se la condizione di questo 'if' non è vera, allora vuol dire che in pagina ho già delle cards visualizzate,
+            // quindi, anche se la chiamata AJAX appena terminata non ha prodoto risultai, non scrivo nulla in pagina
             console.log("scrivo no results");
-            $('.cards-container').append("Non ci sono risultati!");
+            $('.cards-container h3').append("Non ci sono risultati!");
+        } else {
+            console.log("ho già delle card visualizzate");
         }
     }
 
