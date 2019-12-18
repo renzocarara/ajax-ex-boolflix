@@ -29,14 +29,14 @@
 
     <script id="card-template" type="text/x-handlebars-template">
         {{!-- template per la creazione delle info estratte da TheMovieDB --}}
-        <ol class="card">
+        <ul class="card">
             <li><strong>Titolo: </strong>{{ title }}</li>
             <li><strong>Titolo Originale: </strong>{{ original-title }}</li>
             <li><strong>Lingua: </strong>{{{ flag-image }}}</li>
             <li><strong>Voto: </strong>{{{ stars }}}</li>
             <li><strong>Overview: </strong>{{ overview }}</li>
-            <li><strong>Poster: </strong><img class="poster" src="{{ img-link }}" alt="locandina"></li>
-        </ol>
+            <li><img class="poster overlap" src="{{ img-link }}" alt="locandina"></li>
+        </ul>
     </script>
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>

@@ -24,6 +24,25 @@ $(document).ready(function() {
         }
     }); // end evento keypress tasto ENTER
 
+    // intercetto e gestisco eventi mouseenter e mouseleave su una card
+    //uso la $(document).on poichè si tratta di elementi creati dinamicamente
+    $(document).on("mouseenter", ".card", function() {
+        console.log("mouse enter");
+        // nascondo l'immagine poster
+        $(this).find('img').css({
+            "display": "none",
+        });
+
+    }).on("mouseleave", ".card", function() {
+        console.log("mouse leave");
+
+        // faccio riapparire l'immagine poster
+        $(this).find('img').css({
+            "display": "block",
+        });
+    });
+
+
 }); // fine document ready
 
 // ---------------------------- FUNCTIONs --------------------------------------
@@ -109,8 +128,8 @@ function handleResponse(data, endpoint) {
                 'original-title': original_title,
                 'flag-image': createFlag(results[i].original_language),
                 'stars': createStars(results[i].vote_average),
-                'img-link': createImgLink(results[i].poster_path),
-                'overview': results[i].overview
+                'overview': createOverview(results[i].overview),
+                'img-link': createImgLink(results[i].poster_path)
             };
 
             // chiamo la funzione generata da HANDLEBARS per popolare il template
@@ -118,6 +137,11 @@ function handleResponse(data, endpoint) {
 
             // aggiungo nella mia pagina il codice HTML generato da HANDLEBARS
             $('.cards-container').append(card);
+
+            // inserisco l'immagine di copertina (poster) come background della card appena appesa in pagina
+            // var imgLink = createImgLink(results[i].poster_path);
+            // var darkBgi = "images/dark_background.png";
+            // $(".cards-container .card").last().css("backgroundImage", "url(" + imgLink + "), url(" + darkBgi + ")");
 
         } // end for
 
@@ -135,19 +159,19 @@ function handleResponse(data, endpoint) {
 function createImgLink(posterLink) {
     // crea il path completo per recuperare l'immagine (poster) del film/serie tv
     // gestisce il caso in cui il poster non è disponibile
-
-    var imgUrlStart = 'https://image.tmdb.org/t/p/'; // indirizzo base per lel immagini
-    var imgUrlSize = 'w92/'; // dimensione dell'immagine
-    var imgUrlEnd = posterLink; // indirizzo specifico dell'immagine corrente
+    var defaultPoster = 'images/no_preview_poster.png';
+    var imgUrlFixed = 'https://image.tmdb.org/t/p/'; // indirizzo base per lel immagini
+    var imgUrlSize = 'w342/'; // dimensione dell'immagine
+    var imgUrlVariable = posterLink; // indirizzo specifico dell'immagine richiesta tramite API
     var wholePath = "";
 
-    if (imgUrlEnd == null) {
+    if (imgUrlVariable == null) {
         // caso limite in cui l'API mi risponde con un path "null", non c'è il poster
-        // in questo caso utilizzo un immagine di default
-        wholePath = "images/default_poster.png";
+        // in questo caso utilizzo un'immagine di default
+        wholePath = defaultPoster;
     } else {
         // compongo il path con le parti fisse + il path parziale recuperato con l'API
-        wholePath = imgUrlStart + imgUrlSize + imgUrlEnd;
+        wholePath = imgUrlFixed + imgUrlSize + imgUrlVariable;
     }
 
     return wholePath;
@@ -176,12 +200,12 @@ function createFlag(lang) {
 
 function createStars(vote) {
     // crea il codice HTML da inserire nel template di HANDLEBARS
-    // restituisce il codice HTML per visualizzare le stelle
+    // restituisce il codice HTML per visualizzare le stelle (5)
 
-    var starsCounter = Math.round(vote / 2); // numero di stelle piene da visualizzare
+    var starsCounter = Math.round(vote / 2); // numero di stelle piene da visualizzare (da 0 a 5)
     var fullStar = '<i class="fas fa-star"></i>'; // stella piena
     var emptyStar = '<i class="far fa-star grayed"></i>'; // stella vuota
-    var stars = ""; // valore ritornato dalla funzione
+    var stars = ""; // codice HTML ritornato dalla funzione
 
     // ciclo sempre 5 volte e inserisco le stelle piene o vuote in base a starsCounter
     for (var i = 0; i < 5; i++) {
@@ -195,3 +219,15 @@ function createStars(vote) {
 
     return stars;
 } // fine funzione createStars()
+
+function createOverview(text) {
+    var textToBeDisplayed; // overview da inserire in pagina
+
+    if (text == "") {
+        // non c'è una Overview
+        textToBeDisplayed = "not available";
+    } else {
+        textToBeDisplayed = text;
+    }
+    return textToBeDisplayed;
+}
