@@ -14,9 +14,11 @@
 <body>
 
     <header>
-        <div class="header-container clearfix">
+        <div class="header-container container clearfix">
             <div id="logo-panel">
-                <h1>Boolflix</h1>
+                <a href="#">
+                    <h1>Boolflix</h1>
+                </a>
             </div>
             <div id="search-panel">
                 <input id="search-input" type="text" placeholder="Scrivi qui...">
@@ -26,13 +28,19 @@
     </header>
 
     <main>
-        <h2>Film:</h2>
-        <div id="movies-container" class="cards-container">
-            <!-- contenuto generato dinamicamente con i dati recuperati da TMDB -->
-        </div>
-        <h2>Serie TV:</h2>
-        <div id="series-container" class="cards-container">
-            <!-- contenuto generato dinamicamente con i dati recuperati da TMDB -->
+        <div class="main-container container">
+            <section>
+                <h2>Film:</h2>
+                <div id="movies-container" class="cards-container">
+                    <!-- contenuto generato dinamicamente con i dati recuperati da TMDB -->
+                </div>
+            </section>
+            <section id="series-sect">
+                <h2>Serie TV:</h2>
+                <div id="series-container" class="cards-container">
+                    <!-- contenuto generato dinamicamente con i dati recuperati da TMDB -->
+                </div>
+            </section>
         </div>
     </main>
 
