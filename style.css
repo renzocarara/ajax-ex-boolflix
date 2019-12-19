@@ -13,11 +13,25 @@ header {
     min-height: 80px;
 }
 
+main {
+    background-color: #343534;
+    /* altezza viewport - altezza header */
+    min-height: calc(100vh - 80px);
+}
+
 h1 {
     /* display: inline-block; */
     line-height: 80px;
     color: red;
     margin-left: 20px;
+}
+
+h2 {
+    text-align: center;
+    color: white;
+    background-color: #343534;
+    padding-top: 15px;
+    display: none;
 }
 
 input {
@@ -32,8 +46,12 @@ input:focus {
 }
 
 button {
-    margin: 24px 20px 30px 0;
+    margin: 24px 20px 24px 0;
     padding: 6px 12px;
+}
+
+.visible {
+    display: block;
 }
 
 .clearfix {
@@ -61,13 +79,12 @@ button {
     justify-content: center;
     flex-wrap: wrap;
     background-color: #343534;
-    /* altezza viewport - altezza header */
-    min-height: calc(100vh - 80px);
     padding-bottom: 40px;
-    padding-top: 20px;
+    /* padding-top: 20px; */
     color: white;
 }
 
+/* contenitore per la singola "serie TV" o "film" */
 .card {
     position: relative;
     border: 1px solid white;
@@ -76,7 +93,7 @@ button {
     padding: 20px;
     background-color: #333e49;
     color: white;
-    margin: 20px 20px 0 20px;
+    margin: 20px;
     overflow-y: hidden;
 }
 
@@ -93,6 +110,7 @@ i.grayed {
     color: lightgray;
 }
 
+/* bandierina associata alla lingua  */
 .flag {
     width: 20px;
     height: 15px;
@@ -100,11 +118,13 @@ i.grayed {
     vertical-align: text-bottom;
 }
 
+/* immagine poster */
 .poster {
     width: 100%;
     height: 100%;
 }
 
+/* riposiziono l'immagine poster per coprire tutta la card */
 .overlap {
     position: absolute;
     top: 0;

@@ -77,6 +77,8 @@ function handleUserSearch(searchString) {
         $('#search-input').val("");
         // svuoto il contenitore delle cards sulla pagina HTML
         $('.cards-container').empty();
+        // visualizzo gli header per le sezioni Film e Serie TV
+        $('h2').addClass('visible');
     }
 } // fine funzione handleUserSearch()
 
@@ -109,14 +111,15 @@ function handleResponse(data, endpoint) {
     // crea un oggetto per HANDLEBARS per valorizzare il template
     // chiama diverse altre funzioni che preparano i singoli valori delle proprietà dell'oggetto
 
+    var APIendpointMovie = '/search/movie'; // endpoint dell'API
+    var APIendpointTV = '/search/tv'; // endpoint dell'API
+
     if (data.total_results > 0) { // ci sono dei risultati da elaborare
 
-        var APIendpointMovie = '/search/movie'; // endpoint dell'API
-        var APIendpointTV = '/search/tv'; // endpoint dell'API
         var title; // titolo del film o della serie TV
-        var MovieOrTV; // distingue se FILM o SERIE TV
         var original_title; // titolo originale del film o della serie TV
         var results = data.results; // estraggo la parte di risultati che mi interessa
+        var MovieOrTV; // distingue se FILM o SERIE TV
 
 
         // recupero il codice html dal template HANDLEBARS
@@ -154,32 +157,40 @@ function handleResponse(data, endpoint) {
             // chiamo la funzione generata da HANDLEBARS per popolare il template
             var card = cardFunction(context);
 
-            // if ($('.cards-container').find('.card').length <= 0) {
-            //     console.log("ho risultati, ma potrebbe esserci msg, pulisco");
-            //     // non ci sono cards in pagina, ma potrebbe esserci il msg "nessun risultato" dell'altra chiamamta AJAX
-            //     // non so se la prima o la seconda, poichè sono asincrone!! ma quella che ha finito prima potrebbe
-            //     // non aver prodotto risultati e per cui potrei avere scritto in pagina "Non ci sono risultati"
-            //     // pulisco il contenitore delle cards da un eventuale messaggio che segnala nessun risultato
-            //     $('.cards-container').empty();
-            // }
             // aggiungo nella mia pagina le cards, ovvero il codice HTML generato da HANDLEBARS
-            $('.cards-container').append(card);
+            if (MovieOrTV == "Film") {
+                $('#movies-container').append(card);
+            } else {
+                $('#series-container').append(card);
+            }
 
         } // end for
 
     } else {
-        // se la pagina è ancora completamente vuota (non ci sono cards ne tag), inserisco un tag "segnaposto"
-        // che mi servià se ripasso da queto ramo else al completamento della prossima chiamat AJAX
-        if ($('.cards-container').html() == "") {
-            // scrivo un tag <h3> per ricordarmi che la prima chiamata AJAX completata non ha prodotto risultati
-            $('.cards-container').html('<h3></h3>');
-        } else if ($('.cards-container').children('h3').length > 0) {
-            // al termine della precedente chiamata AJAX, non c'erano dati in pagina e ho scritto un tag <h3>,
-            // ora che nuovamente non ho dati da scrivere, lo valorizzo col messaggio di avviso
-            // se invece la condizione di questo 'else if' non è vera, allora vuol dire che in pagina ho già delle cards visualizzate,
-            // quindi, anche se la chiamata AJAX appena terminata non ha prodoto risultai, non scrivo il messaggio di avviso
-            $('.cards-container h3').append("Non ci sono risultati!");
+
+        if (endpoint == APIendpointMovie) {
+            // non è stato trovato nessun Film
+            $('#movies-container').append("Non sono stati trovati Film");
+
+        } else {
+            // non è stata trovata nessuna Serie TV
+            $('#series-container').append("Non sono state trovate Serie TV");
         }
+
+        // ------------------------------gestione tramite tag----------------------------------------------
+        // // se la pagina è ancora completamente vuota (non ci sono cards ne tag), inserisco un tag "segnaposto"
+        // // che mi servià se ripasso da queto ramo else al completamento della prossima chiamata AJAX
+        // if ($('.cards-container').html() == "") {
+        //     // scrivo un tag <h3> per ricordarmi che la prima chiamata AJAX completata non ha prodotto risultati
+        //     $('.cards-container').html('<h3></h3>');
+        // } else if ($('.cards-container').children('h3').length > 0) {
+        //     // al termine della precedente chiamata AJAX, non c'erano dati in pagina e ho scritto un tag <h3>,
+        //     // ora che nuovamente non ho dati da scrivere, lo valorizzo col messaggio di avviso
+        //     // se invece la condizione di questo 'else if' non è vera, allora vuol dire che in pagina ho già delle cards visualizzate,
+        //     // quindi, anche se la chiamata AJAX appena terminata non ha prodoto risultai, non scrivo il messaggio di avviso
+        //     $('.cards-container h3').append("Non ci sono risultati!");
+        // }
+        // ------------------------------------------------------------------------------------------------------------------
     }
 
 } // fine funzione handleResponse()
@@ -263,3 +274,55 @@ function createOverview(text) {
     }
     return textToBeDisplayed;
 }
+
+
+
+// mil5
+// chiamata con get/movie{move_id} ilmovie_id lo leggo dall'oggetto della chiamata search/movie
+// https://api.themoviedb.org/3/movie/25606?api_key=541a69e2ef5cfc0e4d5d4e563ef1de78&language=it-IT
+var oggetto = {
+    "adult": false,
+    "backdrop_path": "/17UicwOSvWjHUpT5arG20PoM66e.jpg",
+    "belongs_to_collection": {
+        "id": 41658,
+        "name": "Fantozzi - Collezione",
+        "poster_path": "/f2nxUik9UU3AOquFGCzKBzcxeY0.jpg",
+        "backdrop_path": "/h2L6fnTYieCrNscxbtjGG31lBRm.jpg"
+    },
+    "budget": 0,
+    "genres": [{
+        "id": 35,
+        "name": "Commedia"
+    }],
+    "homepage": "",
+    "id": 25606,
+    "imdb_id": "tt0071486",
+    "original_language": "it",
+    "original_title": "Fantozzi",
+    "overview": "Dopo aver lottato con i mezzi pubblici perennemente strapieni, il ragionier Ugo Fantozzi arriva finalmente in ufficio. Qui trova ad attenderlo pile di pratiche da sbrigare rifilategli dai furbi colleghi. Costretto a partecipare a gite aziendali e partite di calcio, Fantozzi è anche ossessionato da una moglie brutta e da una figlia orripilante.",
+    "popularity": 6.258,
+    "poster_path": "/oHqHe0MNqcbmw5Qa3075KIzE4G7.jpg",
+    "production_companies": [{
+        "id": 12778,
+        "logo_path": null,
+        "name": "Rizzoli Film",
+        "origin_country": ""
+    }],
+    "production_countries": [{
+        "iso_3166_1": "IT",
+        "name": "Italy"
+    }],
+    "release_date": "1975-03-27",
+    "revenue": 0,
+    "runtime": 103,
+    "spoken_languages": [{
+        "iso_639_1": "it",
+        "name": "Italiano"
+    }],
+    "status": "Released",
+    "tagline": "",
+    "title": "Fantozzi",
+    "video": false,
+    "vote_average": 7.9,
+    "vote_count": 461
+};
