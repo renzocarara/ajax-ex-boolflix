@@ -31,10 +31,8 @@ $(document).ready(function() {
     // uso notazione in cascata, concatenando i due eventi
     $(document).on("mouseenter", ".card", function() {
 
-        if ($(this).find('.poster').length > 0) { // verifico se c'è il poster
-            // nascondo l'immagine poster, rendendo così visibile il testo sottostante
-            $(this).find('.poster').hide();
-        }
+        // nascondo l'immagine poster, rendendo così visibile il testo sottostante
+        $(this).find('.poster').hide();
         // abilito la scrollbar verticale per scrollare il testo, appare solo se necessaria
         $(this).addClass('enableScrollbarY');
 
@@ -44,11 +42,8 @@ $(document).ready(function() {
         $(this).scrollTop(0);
         // disabilito la scrollbar verticale
         $(this).removeClass('enableScrollbarY');
-
-        if ($(this).find('.poster').length > 0) { // verifico se c'è il poster
-            // faccio riapparire l'immagine poster che mi va a coprire il testo
-            $(this).find('.poster').show();
-        }
+        // faccio riapparire l'immagine poster che mi va a coprire il testo
+        $(this).find('.poster').show();
 
     }); // end eventi mouseenter e mouseleave
 
@@ -150,7 +145,7 @@ function handleResponse(data, endpoint) {
                 'flag-image': createFlag(results[i].original_language),
                 'stars': createStars(results[i].vote_average),
                 'overview': createOverview(results[i].overview),
-                'poster': createImgLink(results[i].poster_path),
+                'img-link': createImgLink(results[i].poster_path),
                 'type': MovieOrTV
             };
 
@@ -176,21 +171,6 @@ function handleResponse(data, endpoint) {
             // non è stata trovata nessuna Serie TV
             $('#series-container').append("Non sono state trovate Serie TV");
         }
-
-        // ------------------------------gestione tramite tag----------------------------------------------
-        // // se la pagina è ancora completamente vuota (non ci sono cards ne tag), inserisco un tag "segnaposto"
-        // // che mi servià se ripasso da queto ramo else al completamento della prossima chiamata AJAX
-        // if ($('.cards-container').html() == "") {
-        //     // scrivo un tag <h3> per ricordarmi che la prima chiamata AJAX completata non ha prodotto risultati
-        //     $('.cards-container').html('<h3></h3>');
-        // } else if ($('.cards-container').children('h3').length > 0) {
-        //     // al termine della precedente chiamata AJAX, non c'erano dati in pagina e ho scritto un tag <h3>,
-        //     // ora che nuovamente non ho dati da scrivere, lo valorizzo col messaggio di avviso
-        //     // se invece la condizione di questo 'else if' non è vera, allora vuol dire che in pagina ho già delle cards visualizzate,
-        //     // quindi, anche se la chiamata AJAX appena terminata non ha prodoto risultai, non scrivo il messaggio di avviso
-        //     $('.cards-container h3').append("Non ci sono risultati!");
-        // }
-        // ------------------------------------------------------------------------------------------------------------------
     }
 
 } // fine funzione handleResponse()
@@ -201,16 +181,18 @@ function createImgLink(posterLink) {
     // gestisce il caso in cui il poster non è disponibile
 
     // var defaultPoster = 'images/no_preview_poster.png';
-    var imgUrlFixed = 'https://image.tmdb.org/t/p/'; // indirizzo base per lel immagini
+    var imgUrlFixed = 'https://image.tmdb.org/t/p/'; // indirizzo base per le immagini
     var imgUrlSize = 'w342/'; // dimensione dell'immagine
     var imgUrlVariable = posterLink; // indirizzo specifico dell'immagine richiesta tramite API
+    var imgNotAvailable = "images/no_poster.png";
     var path = "";
 
     if (imgUrlVariable != null) {
-        // nel caso in cui l'API mi risponde con un path "null", non c'è il poster ritorno una stringa vuota
-        // compongo il path con le parte fissa + la dimensione + il path parziale recuperato con l'API
+        // compongo il path con le parti fisse + il path parziale recuperato con l'API
         path = imgUrlFixed + imgUrlSize + imgUrlVariable;
-        path = '<li><img class="poster overlap" src="' + path + '"></li>';
+    } else {
+        // non c'è il poster, utilizzo un'immagine di default
+        path = imgNotAvailable;
     }
 
     return path;
