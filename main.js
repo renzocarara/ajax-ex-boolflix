@@ -3,10 +3,13 @@
 
 // ------------------------------- CONSTANTs -----------------------------------
 var APIurl = 'https://api.themoviedb.org/3'; // indirizzo base API TMDB
-var APIendpointMovie = '/search/movie'; // endpoint dell'API
-var APIendpointTV = '/search/tv'; // endpoint dell'API
+var APIsearchMovie = '/search/movie'; // endpoint dell'API
+var APIsearchTV = '/search/tv'; // endpoint dell'API
+var APImovie = '/movie/movie_id'; // endpoint dell'API
+var APItv = '/tv_id'; // endpoint dell'API
+var APIcredits = '/movie/id/credits'; // endpoint dell'API
 var APIkey = '541a69e2ef5cfc0e4d5d4e563ef1de78'; // la mia chiave per le API TDMB
-var lang = 'it-IT'; // parametro lingua, quando costruisco la richiesta all'API
+var APIlang = 'it-IT'; // parametro lingua, quando costruisco la richiesta all'API
 
 var imgUrlFixed = 'https://image.tmdb.org/t/p/'; // indirizzo base per le immagini
 var imgUrlSize = 'w342/'; // dimensione dell'immagine
@@ -67,9 +70,9 @@ function handleUserSearch(searchString) {
     // verifico che la stringa non sia nulla, se la stringa è nulla non faccio niente
     if (searchString) {
         // chiamata AJAX per recuperare i dati ricercati tramite API -- CERCO I MOVIES
-        callAJAX(APIurl, APIendpointMovie, APIkey, searchString, lang);
+        callAJAX(APIsearchMovie, searchString);
         // chiamata AJAX per recuperare i dati ricercati tramite API -- CERCO TV SERIES
-        callAJAX(APIurl, APIendpointTV, APIkey, searchString, lang);
+        callAJAX(APIsearchTV, searchString);
         //resetto il campo di input inserendo una stringa vuota
         $('#search-input').val("");
         // svuoto il contenitore delle cards sulla pagina HTML
@@ -80,16 +83,16 @@ function handleUserSearch(searchString) {
 } // fine funzione handleUserSearch()
 
 
-function callAJAX(url, endpoint, key, query, lang) {
+function callAJAX(endpoint, query) {
     // DESCRIZIONE:
     // chiamata AJAX usando i parametri in ingresso alla funzione
 
     $.ajax({
-        url: url + endpoint,
+        url: APIurl + endpoint,
         data: {
-            'api_key': key,
+            'api_key': APIkey,
             'query': query,
-            'language': lang
+            'language': APIlang
         },
         method: 'get',
         success: function(response) {
@@ -123,8 +126,9 @@ function handleResponse(data, endpoint) {
         // ciclo su tutto l'array composto dai dati ricevuti dal server
         for (var i = 0; i < results.length; i++) {
 
-            // distinguo a seconda se è un movie o una TV series
-            if (endpoint == APIendpointMovie) {
+            // distinguo a seconda se è un film o una serie TV
+            // solo i film hanno la proprietà 'title', le serie TV hanno invece la proprietà 'name'
+            if (results[i].hasOwnProperty('title')) {
                 // ramo MOVIES
                 title = results[i].title;
                 original_title = results[i].original_title;
@@ -152,10 +156,10 @@ function handleResponse(data, endpoint) {
 
             // aggiungo nella mia pagina le cards, ovvero il codice HTML generato da HANDLEBARS
             if (MovieOrTV == "Film") {
-                // li aggiungo nella sezione Film
+                // aggiungo la card nella sezione Film
                 $('#movies-container').append(card);
             } else {
-                // li aggiungo nella sezione Serie TV
+                // aggiungo la card nella sezione Serie TV
                 $('#series-container').append(card);
             }
 
@@ -163,7 +167,7 @@ function handleResponse(data, endpoint) {
 
     } else {
 
-        if (endpoint == APIendpointMovie) {
+        if (endpoint == APIsearchMovie) {
             // non è stato trovato nessun Film
             $('#movies-container').append("Non sono stati trovati Film");
 
