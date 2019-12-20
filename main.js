@@ -141,7 +141,7 @@ function handleResponse(data, endpoint) {
 function getCast(mainInfo) {
     // DESCRIZIONE:
     // effettua chiamata AJAX per recuperare i dati relativi al cast
-    // in caso di successo/errore chiama una funzione che crea la card con tutte le info
+    // in ogni caso (successo/errore) chiama una funzione che crea la card con tutte le info
 
     var creditsPath = ""; // path parziale per la chiamata API
     var currentId = mainInfo.id; // id del film o serie TV corrente
@@ -172,11 +172,9 @@ function getCast(mainInfo) {
             createCard(castInfo, mainInfo);
         },
         error: function() {
-            // alert("ERROR!");
             // inizializzo l'oggetto che sarebbe dovuto tornarmi nel caso SUCCESS
-            // in modo che la funzione che poi lo manipola visualizzi un messaggio
-            // "non disponibile"
-            castList.cast = "";
+            // in modo che la funzione che poi lo manipola visualizzi la stringa "non disponibile"
+            castInfo.cast = "";
             // chiamo comunque la funzione per creare la card, anche se non ho recuperato il cast
             createCard(castInfo, mainInfo);
         }
