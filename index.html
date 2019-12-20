@@ -46,16 +46,18 @@
 
     <script id="card-template" type="text/x-handlebars-template">
         {{!-- template per la creazione delle info estratte da TheMovieDB --}}
-        <ul class="card">
-            <li><strong>Titolo: </strong>{{ title }}</li>
-            <li><strong>Titolo Originale: </strong>{{ original-title }}</li>
-            <li><strong>Tipologia: </strong>{{ type }}</li>
-            <li><strong>Lingua: </strong>{{{ flag-image }}}</li>
-            <li><strong>Voto: </strong>{{{ stars }}}</li>
-            <li><strong>Cast: </strong>{{ cast }}</li>
-            <li><strong>Overview: </strong>{{ overview }}</li>
-            <li><img class="poster overlap" src="{{ img-link }}" alt="locandina {{ title }}"></li>
-        </ul>
+        <div class="card">
+            <ul class="info-list">
+                <li><strong>Titolo: </strong>{{ title }}</li>
+                <li><strong>Titolo Originale: </strong>{{ original-title }}</li>
+                <li><strong>Tipologia: </strong>{{ type }}</li>
+                <li><strong>Lingua: </strong>{{{ flag-image }}}</li>
+                <li><strong>Voto: </strong>{{{ stars }}}</li>
+                <li><strong>Cast: </strong>{{ cast }}</li>
+                <li><strong>Overview: </strong>{{ overview }}</li>
+            </ul>
+            <img class="poster overlap" src="{{ img-link }}" alt="locandina {{ title }}">
+        </div>
     </script>
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>

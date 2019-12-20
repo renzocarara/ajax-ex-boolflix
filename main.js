@@ -46,14 +46,12 @@ $(document).ready(function() {
         // nascondo l'immagine poster, rendendo così visibile il testo sottostante
         $(this).find('.poster').hide();
         // abilito la scrollbar verticale per scrollare il testo, appare solo se necessaria
-        $(this).addClass('enableScrollbarY');
+        $(this).find('.info-list').addClass('enableScrollbarY');
 
     }).on("mouseleave", ".card", function() {
 
-        // riporto lo scroll all'inizio, in caso l'utente avesse scrollato la card
-        $(this).scrollTop(0);
         // disabilito la scrollbar verticale
-        $(this).removeClass('enableScrollbarY');
+        $(this).find('.info-list').removeClass('enableScrollbarY');
         // faccio riapparire l'immagine poster che mi va a coprire il testo
         $(this).find('.poster').show();
 
@@ -101,7 +99,7 @@ function getMainData(endpoint, query) {
             handleResponse(response, endpoint);
         },
         error: function() {
-            alert("ERROR! there's a problem...");
+            alert("ERROR! Data has not been retrieved.");
         }
     }); // end AJAX call
 } // fine funzione callAJAX()
@@ -146,19 +144,12 @@ function getCast(mainInfo) {
     var creditsPath = ""; // path parziale per la chiamata API
     var currentId = mainInfo.id; // id del film o serie TV corrente
 
-    console.log("currentId", currentId);
-    console.log("mainInfo", mainInfo);
-
     // costruisco il path per la chiamata API a seconda che sia Movie o TV Series
     if (mainInfo.hasOwnProperty('title')) {
-        console.log("è un movie");
         creditsPath = APIcreditsMovie.replace("id", currentId); // ramo MOVIES
     } else {
-        console.log("è una serie");
         creditsPath = APIcreditsTV.replace("id", currentId); // ramo TV SERIES
     }
-
-    console.log("credits", creditsPath);
 
     // chiamata ajax per recuperare il cast
     $.ajax({
@@ -172,7 +163,7 @@ function getCast(mainInfo) {
             createCard(castInfo, mainInfo);
         },
         error: function() {
-            // inizializzo l'oggetto che sarebbe dovuto tornarmi nel caso SUCCESS
+            // inizializzo la proprietà dell'oggetto che sarebbe dovuto tornarmi nel caso SUCCESS
             // in modo che la funzione che poi lo manipola visualizzi la stringa "non disponibile"
             castInfo.cast = "";
             // chiamo comunque la funzione per creare la card, anche se non ho recuperato il cast
