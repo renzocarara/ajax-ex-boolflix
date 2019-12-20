@@ -141,7 +141,7 @@ function handleResponse(data, endpoint) {
 function getCast(mainInfo) {
     // DESCRIZIONE:
     // effettua chiamata AJAX per recuperare i dati relativi al cast
-    // in caso di successo chiama una funzione che crea la card con tutte le info
+    // in caso di successo/errore chiama una funzione che crea la card con tutte le info
 
     var creditsPath = ""; // path parziale per la chiamata API
     var currentId = mainInfo.id; // id del film o serie TV corrente
@@ -169,11 +169,16 @@ function getCast(mainInfo) {
         },
         method: 'get',
         success: function(castInfo) {
-
             createCard(castInfo, mainInfo);
         },
         error: function() {
-            alert("ERROR! there's a problem...");
+            // alert("ERROR!");
+            // inizializzo l'oggetto che sarebbe dovuto tornarmi nel caso SUCCESS
+            // in modo che la funzione che poi lo manipola visualizzi un messaggio
+            // "non disponibile"
+            castList.cast = "";
+            // chiamo comunque la funzione per creare la card, anche se non ho recuperato il cast
+            createCard(castInfo, mainInfo);
         }
     }); // end AJAX call
 
@@ -181,7 +186,7 @@ function getCast(mainInfo) {
 
 function createCard(castData, mainData) {
     // DESCRIZIONE:
-    // questa funzione ha tutti i dati necessari per preparare l'oggetto da passare ad HANDLEBARS
+    // questa funzione ha tutti i dati necessari per preparare l'oggetto su cui lavora HANDLEBARS
     // incluso le info sul cast che riceve in ingresso come parametro
     // chiama diverse altre funzioni che preparano i singoli valori delle proprietà dell'oggetto
 
