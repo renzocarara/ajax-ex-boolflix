@@ -7,7 +7,8 @@ var APIsearchMovie = '/search/movie'; // endpoint dell'API
 var APIsearchTV = '/search/tv'; // endpoint dell'API
 var APImovie = '/movie/movie_id'; // endpoint dell'API
 var APItv = '/tv_id'; // endpoint dell'API
-var APIcredits = '/movie/id/credits'; // endpoint dell'API
+var APIcreditsMovie = '/movie/id/credits'; // endpoint dell'API, 'id' deve essere sostituito con id corrente
+var APIcreditsTV = '/tv/id/credits'; // endpoint dell'API, 'id' deve essere sostituito con id corrente
 var APIkey = '541a69e2ef5cfc0e4d5d4e563ef1de78'; // la mia chiave per le API TDMB
 var APIlang = 'it-IT'; // parametro lingua, quando costruisco la richiesta all'API
 
@@ -70,9 +71,9 @@ function handleUserSearch(searchString) {
     // verifico che la stringa non sia nulla, se la stringa è nulla non faccio niente
     if (searchString) {
         // chiamata AJAX per recuperare i dati ricercati tramite API -- CERCO I MOVIES
-        callAJAX(APIsearchMovie, searchString);
+        getMainData(APIsearchMovie, searchString);
         // chiamata AJAX per recuperare i dati ricercati tramite API -- CERCO TV SERIES
-        callAJAX(APIsearchTV, searchString);
+        getMainData(APIsearchTV, searchString);
         //resetto il campo di input inserendo una stringa vuota
         $('#search-input').val("");
         // svuoto il contenitore delle cards sulla pagina HTML
@@ -83,9 +84,10 @@ function handleUserSearch(searchString) {
 } // fine funzione handleUserSearch()
 
 
-function callAJAX(endpoint, query) {
+function getMainData(endpoint, query) {
     // DESCRIZIONE:
-    // chiamata AJAX usando i parametri in ingresso alla funzione
+    // chiamata ad AJAX usando i parametri in ingresso alla funzione
+    // per recuperare tutti i dati base del film o serie TV
 
     $.ajax({
         url: APIurl + endpoint,
@@ -107,62 +109,19 @@ function callAJAX(endpoint, query) {
 
 function handleResponse(data, endpoint) {
     // DESCRIZIONE:
-    // estrae i dati che mi interessano dalla risposta ricevuta dall'API
-    // crea un oggetto per HANDLEBARS per valorizzare il template
-    // chiama diverse altre funzioni che preparano i singoli valori delle proprietà dell'oggetto
+    // esegue un ciclo 'for' su tutti i film o serie TV precedentemente trovate
+    // per ognuno chiama una funzione per recuperare i dati del cast
+    // se non ci sono film o serie Tv da scorrere scrive un messaggio in pagina
 
     if (data.total_results > 0) { // ci sono dei risultati da elaborare
 
-        var title; // titolo del film o della serie TV
-        var original_title; // titolo originale del film o della serie TV
-        var results = data.results; // estraggo la parte di risultati che mi interessa
-        var MovieOrTV; // distingue se FILM o SERIE TV
-
-        // recupero il codice html dal template HANDLEBARS
-        var cardTemplate = $('#card-template').html();
-        // compilo il template HANDLEBARS, lui mi restituisce un funzione
-        var cardFunction = Handlebars.compile(cardTemplate);
+        var mainInfo = data.results; // estraggo la parte di risultati che mi interessa
 
         // ciclo su tutto l'array composto dai dati ricevuti dal server
-        for (var i = 0; i < results.length; i++) {
-
-            // distinguo a seconda se è un film o una serie TV
-            // solo i film hanno la proprietà 'title', le serie TV hanno invece la proprietà 'name'
-            if (results[i].hasOwnProperty('title')) {
-                // ramo MOVIES
-                title = results[i].title;
-                original_title = results[i].original_title;
-                MovieOrTV = "Film";
-            } else {
-                // ramo TV SERIES
-                title = results[i].name;
-                original_title = results[i].original_name;
-                MovieOrTV = "Serie TV";
-            }
-
-            // creo un oggetto per HANDLEBARS con i dati da inserire in pagina
-            var context = {
-                'title': title,
-                'original-title': original_title,
-                'flag-image': createFlag(results[i].original_language),
-                'stars': createStars(results[i].vote_average),
-                'overview': createOverview(results[i].overview),
-                'img-link': createImgLink(results[i].poster_path),
-                'type': MovieOrTV
-            };
-
-            // chiamo la funzione generata da HANDLEBARS per popolare il template
-            var card = cardFunction(context);
-
-            // aggiungo nella mia pagina le cards, ovvero il codice HTML generato da HANDLEBARS
-            if (MovieOrTV == "Film") {
-                // aggiungo la card nella sezione Film
-                $('#movies-container').append(card);
-            } else {
-                // aggiungo la card nella sezione Serie TV
-                $('#series-container').append(card);
-            }
-
+        // ovvero i film o serie TV trovati
+        for (var i = 0; i < mainInfo.length; i++) {
+            // chiamo funzione per recuperare i dati del cast
+            getCast(mainInfo[i]);
         } // end for
 
     } else {
@@ -178,6 +137,126 @@ function handleResponse(data, endpoint) {
     }
 
 } // fine funzione handleResponse()
+
+function getCast(mainInfo) {
+    // DESCRIZIONE:
+    // effettua chiamata AJAX per recuperare i dati relativi al cast
+    // in caso di successo chiama una funzione che crea la card con tutte le info
+
+    var creditsPath = ""; // path parziale per la chiamata API
+    var currentId = mainInfo.id; // id del film o serie TV corrente
+
+    console.log("currentId", currentId);
+    console.log("mainInfo", mainInfo);
+
+    // costruisco il path per la chiamata API a seconda che sia Movie o TV Series
+    if (mainInfo.hasOwnProperty('title')) {
+        console.log("è un movie");
+        creditsPath = APIcreditsMovie.replace("id", currentId); // ramo MOVIES
+    } else {
+        console.log("è una serie");
+        creditsPath = APIcreditsTV.replace("id", currentId); // ramo TV SERIES
+    }
+
+    console.log("credits", creditsPath);
+
+    // chiamata ajax per recuperare il cast
+    $.ajax({
+        url: APIurl + creditsPath,
+        data: {
+            'api_key': APIkey,
+            'language': APIlang
+        },
+        method: 'get',
+        success: function(castInfo) {
+
+            createCard(castInfo, mainInfo);
+        },
+        error: function() {
+            alert("ERROR! there's a problem...");
+        }
+    }); // end AJAX call
+
+} // fine getCast()
+
+function createCard(castData, mainData) {
+    // DESCRIZIONE:
+    // questa funzione ha tutti i dati necessari per preparare l'oggetto da passare ad HANDLEBARS
+    // incluso le info sul cast che riceve in ingresso come parametro
+    // chiama diverse altre funzioni che preparano i singoli valori delle proprietà dell'oggetto
+
+    var title; // titolo del film o della serie TV
+    var original_title; // titolo originale del film o della serie TV
+    var MovieOrTV; // tipologia, distingue se FILM o SERIE TV
+
+    // distinguo a seconda se è un film o una serie TV
+    // solo i film hanno la proprietà 'title', le serie TV hanno invece la proprietà 'name'
+    if (mainData.hasOwnProperty('title')) {
+        // ramo MOVIES
+        title = mainData.title;
+        original_title = mainData.original_title;
+        MovieOrTV = "Film";
+    } else {
+        // ramo TV SERIES
+        title = mainData.name;
+        original_title = mainData.original_name;
+        MovieOrTV = "Serie TV";
+    }
+
+    // creo un oggetto per HANDLEBARS con i dati da inserire in pagina
+    var context = {
+        'title': title,
+        'original-title': original_title,
+        'flag-image': createFlag(mainData.original_language),
+        'stars': createStars(mainData.vote_average),
+        'overview': createOverview(mainData.overview),
+        'img-link': createImgLink(mainData.poster_path),
+        'type': MovieOrTV,
+        'cast': createCast(castData)
+    };
+
+    // recupero il codice html dal template HANDLEBARS
+    var cardTemplate = $('#card-template').html();
+    // compilo il template HANDLEBARS, lui mi restituisce un funzione
+    var cardFunction = Handlebars.compile(cardTemplate);
+    // chiamo la funzione generata da HANDLEBARS per popolare il template
+    var card = cardFunction(context);
+
+    // aggiungo nella mia pagina le cards, ovvero il codice HTML generato da HANDLEBARS
+    if (MovieOrTV == "Film") {
+        // aggiungo la card nella sezione Film
+        $('#movies-container').append(card);
+    } else {
+        // aggiungo la card nella sezione Serie TV
+        $('#series-container').append(card);
+    }
+} // fine funzione createCard()
+
+function createCast(castList) {
+    // DESCRIZIONE:
+    // estrae i dati del cast dall'oggetto in ingresso e li restituisce
+    // sotto forma di stringa
+    var castNames = [];
+    var names;
+
+    if (castList.cast.length == 0) {
+        // non ci sono elementi nell'array del cast
+        names = "non disponibile";
+    } else {
+
+        // estraggo i primi 5 elementi o quelli che ci sono
+        castList.cast = castList.cast.slice(0, 5);
+
+        // estraggo solo la proprietà 'name' e la metto in un array
+        for (var i = 0; i < castList.cast.length; i++) {
+            castNames[i] = castList.cast[i].name;
+        }
+        // unisco gli elementi dell'array in un'unica stringa separata da virgola+spazio
+        names = castNames.join(", ");
+    }
+
+    return names;
+}
 
 function createImgLink(posterLink) {
     // DESCRIZIONE:
