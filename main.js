@@ -1,14 +1,27 @@
 // Nome repo: ajax-ex-boolflix
 // -----------------------------------------------------------------------------
+// EXTRAS:
+// Le api sono molto vaste, quindi le potenzialità sono tantissime; alcune feature aggiuntive potrebbero quindi essere:
+// gestire la paginazione: assieme ai risultati abbiamo visto che arriva la proprietà "total_pages" che contiene proprio il numero di pagine totali
+// di risultati (i risultati sono restituiti in "pagine", intese come blocchi, di 20 film/serie). Passando il parametro "page" alla chiamata api,
+// è quindi possibile recuperare anche le pagine di risultati successive alla prima (che è quella che viene restituita di default)
+// aggiungere la possibilità di chiedere i risultati in una lingua diversa, scelta dall'utente quando fa la ricerca,
+// ad esempio con una tendina con un'opzione per ogni lingua (consideratene 3/4, le principali, ad es: IT, EN, ES, FR)
+// aggiungere al filtro per genere, il filtro in base alle stelline: in questo punto è da capire come gestire il "doppio filtro",
+// cioè se l'utente seleziona un genere e ad esempio le 5 stelle => dovrei mostrare i risultati solo di quel genere e solo con 5 stelline!
+// se vogliamo ripassare anche il css, si potrebbe ad esempio aggiungere l'effetto "flip" delle card
 
-// ------------------------------- CONSTANTs -----------------------------------
+// -----------------------------------------------------------------------------
 var APIurl = 'https://api.themoviedb.org/3'; // indirizzo base API TMDB
-var APIsearchMovie = '/search/movie'; // endpoint dell'API
-var APIsearchTV = '/search/tv'; // endpoint dell'API
-var APImovie = '/movie/movie_id'; // endpoint dell'API
-var APItv = '/tv_id'; // endpoint dell'API
-var APIcreditsMovie = '/movie/id/credits'; // endpoint dell'API, 'id' deve essere sostituito con id corrente
-var APIcreditsTV = '/tv/id/credits'; // endpoint dell'API, 'id' deve essere sostituito con id corrente
+var APIsearchMovie = '/search/movie'; // endpoint per ricercare i film
+var APIsearchTV = '/search/tv'; // endpoint per ricercare le serie TV
+// var APImovie = '/movie/movie_id'; // endpoint per richiedere dati di uno specifico film
+// var APItv = '/tv_id'; // endpoint per richiedere dati di una specifica serie TV
+var APIcreditsMovie = '/movie/id/credits'; // endpoint per richiedere il Cast di un film, la stringa 'id' deve essere sostituita con l'id del film
+var APIcreditsTV = '/tv/id/credits'; // endpoint per richiedere Cast di una serieTV , la stringa 'id' deve essere sostituita con l'id della serieTV
+var APIgenresMovie = '/genre/movie/list'; // endpoint per recuperare lista generi per i film
+var APIgenresTV = '/genre/tv/list'; // endpoint per recuperare lista generi per le serie TV
+
 var APIkey = '541a69e2ef5cfc0e4d5d4e563ef1de78'; // la mia chiave per le API TDMB
 var APIlang = 'it-IT'; // parametro lingua, quando costruisco la richiesta all'API
 
@@ -16,17 +29,36 @@ var imgUrlFixed = 'https://image.tmdb.org/t/p/'; // indirizzo base per le immagi
 var imgUrlSize = 'w342/'; // dimensione dell'immagine
 var imgNotAvailable = "images/no_poster.png"; // immagine di default
 
-// array con le lingue per cui è disponibile una bandierina da visualizare
+var notAvailable = "non disponibile"; // stringa da visualizzare quando non ci sono dati
+var maxCastLength = 5 // numero max di componeneti del cast da visualizzare in pagina
+
+// elenco lingue per cui è disponibile una bandierina da visualizare
 var availableFlags = ['bg', 'zh', 'cs', 'de', 'dk', 'en', 'es', 'et', 'fi', 'fr', 'gr', 'hr', 'hu', 'in', 'is',
     'it', 'ja', 'lv', 'nl', 'no', 'pl', 'pt', 'ro', 'ru', 'sl', 'sv', 'tr', 'ua'
 ];
 
+// lista generi per i film
+var movieGenresList = {
+    'genres': []
+};
+// lista generi per le serieTV
+var tvGenresList = {
+    'genres': []
+};
+
+// chiamo una funzione che mi valorizza gli oggetti lista generi facendo una chiamata AJAX
+getGenres(APIgenresMovie); // valorizza l'oggetto che contiene la lista dei generi per i film
+getGenres(APIgenresTV); // valorizza l'oggetto che contiene la lista dei generi per le serieTV
+
+// -----------------------------------------------------------------------------
 $(document).ready(function() {
+
     //intercetto click su bottone per la ricerca
     $('#search-button').click(function() {
         var searchInput = $('#search-input').val(); // recupero la stringa da ricercare
         if (searchInput) { // verifico se la stringa non è nulla
-            handleUserSearch(searchInput); // chiamo una funzione passandogli la stringa da ricercare
+
+            handleSearchInput(searchInput); // chiamo una funzione passandogli la stringa da ricercare
         }
     }); // end evento click su bottone send
 
@@ -34,37 +66,31 @@ $(document).ready(function() {
     $('#search-input').keypress(function(event) {
         if (event.which == 13) { // è stato premuto tasto ENTER (codice 13)
             var searchInput = $('#search-input').val(); // recupero la stringa da ricercare
-            handleUserSearch(searchInput); // chiamo una funzione passandogli la stringa da ricercare
+            handleSearchInput(searchInput); // chiamo una funzione passandogli la stringa da ricercare
         }
     }); // end evento keypress tasto ENTER
 
-    // intercetto e gestisco eventi mouseenter e mouseleave su una card
-    // uso la $(document).on poichè si tratta di elementi creati dinamicamente
-    // uso notazione in cascata, concatenando i due eventi
-    $(document).on("mouseenter", ".card", function() {
-
+    // intercetto e gestisco evento mouseenter su una card
+    $('#movies-container, #series-container').on("mouseenter", ".card", function() {
         // nascondo l'immagine poster, rendendo così visibile il testo sottostante
-        $(this).find('.poster').hide();
-        // abilito la scrollbar verticale per scrollare il testo, appare solo se necessaria
-        $(this).find('.info-list').addClass('enableScrollbarY');
+        $(this).find('.card-poster').addClass('hidden');
+    });
 
-    }).on("mouseleave", ".card", function() {
-
-        // disabilito la scrollbar verticale
-        $(this).find('.info-list').removeClass('enableScrollbarY');
+    // intercetto e gestisco evento mouseleave su una card
+    $('#movies-container, #series-container').on("mouseleave", ".card", function() {
         // faccio riapparire l'immagine poster che mi va a coprire il testo
-        $(this).find('.poster').show();
-
+        $(this).find('.card-poster').removeClass('hidden');
     }); // end eventi mouseenter e mouseleave
-
 
 }); // fine document ready
 
 // ---------------------------- FUNCTIONs --------------------------------------
-function handleUserSearch(searchString) {
+function handleSearchInput(searchString) {
     // DESCRIZIONE:
-    // verifica se c'è una stringa da ricercare e nel caso fa una chiamata AJAX
+    // verifica se c'è una stringa da ricercare e nel caso chiama una funzione
+    // per effettuare una chiamata AJAX (una per i FILM e una per le SERIE TV)
     // dopodichè resetta il campo di ricerca e svuota il contenitore delle cards
+    // visualizza le intestazioni delle sezioni FILM e SERIE TV
 
     // verifico che la stringa non sia nulla, se la stringa è nulla non faccio niente
     if (searchString) {
@@ -74,17 +100,17 @@ function handleUserSearch(searchString) {
         getMainData(APIsearchTV, searchString);
         //resetto il campo di input inserendo una stringa vuota
         $('#search-input').val("");
-        // svuoto il contenitore delle cards sulla pagina HTML
+        // elimino tutte le cards sulla pagina HTML
         $('.cards-container').empty();
-        // visualizzo gli header per le sezioni Film e Serie TV
-        $('h2').addClass('visible');
+        // visualizzo le intestazioni per le sezioni Film e Serie TV
+        $('.section-header').addClass('visible');
     }
-} // fine funzione handleUserSearch()
+} // fine funzione handleSearchInput()
 
 
 function getMainData(endpoint, query) {
     // DESCRIZIONE:
-    // chiamata ad AJAX usando i parametri in ingresso alla funzione
+    // chiamata AJAX usando i parametri in ingresso alla funzione
     // per recuperare tutti i dati base del film o serie TV
 
     $.ajax({
@@ -96,16 +122,16 @@ function getMainData(endpoint, query) {
         },
         method: 'get',
         success: function(response) {
-            handleResponse(response, endpoint);
+            handleMainData(response, endpoint);
         },
         error: function() {
-            alert("ERROR! Data has not been retrieved.");
+            alert("ERRORE! C'è stato un problema nell'accesso ai dati");
         }
     }); // end AJAX call
 } // fine funzione callAJAX()
 
 
-function handleResponse(data, endpoint) {
+function handleMainData(data, endpoint) {
     // DESCRIZIONE:
     // esegue un ciclo 'for' su tutti i film o serie TV precedentemente trovate
     // per ognuno chiama una funzione per recuperare i dati del cast
@@ -115,37 +141,75 @@ function handleResponse(data, endpoint) {
 
         var mainInfo = data.results; // estraggo la parte di risultati che mi interessa
 
-        // ciclo su tutto l'array composto dai dati ricevuti dal server
+        // ciclo su tutto l'array composto dai dati base precedentemente recuperati
         // ovvero i film o serie TV trovati
         for (var i = 0; i < mainInfo.length; i++) {
-            // chiamo funzione per recuperare i dati del cast
+            // per ogni film/serieTV chiamo una funzione per recuperare i dati del cast
             getCast(mainInfo[i]);
         } // end for
 
     } else {
 
-        if (endpoint == APIsearchMovie) {
-            // non è stato trovato nessun Film
+        if (endpoint == APIsearchMovie) { // non è stato trovato nessun Film
             $('#movies-container').append("Non sono stati trovati Film");
 
-        } else {
-            // non è stata trovata nessuna Serie TV
+        } else { // non è stata trovata nessuna Serie TV
             $('#series-container').append("Non sono state trovate Serie TV");
         }
     }
+} // fine funzione handleMainData()
 
-} // fine funzione handleResponse()
+function getGenres(movieOrTv) {
+    // DESCRIZIONE:
+    // esegue chiamata AJAX per recuperare la lista generi
+    // valorizza poi 2 oggetti:
+    // 'movieGenresList' lista generi per i film
+    // 'tvGenresList' lista generi per le serie TV
 
-function getCast(mainInfo) {
+    // chiamata AJAX per recuperare i generi
+    $.ajax({
+        url: APIurl + movieOrTv,
+        data: {
+            'api_key': APIkey,
+            'language': APIlang
+        },
+        method: 'get',
+        success: function(genres) {
+
+            // mi salvo la lista dei generi
+            if (movieOrTv == APIgenresMovie) {
+                movieGenresList = genres;
+            } else {
+                tvGenresList = genres;
+            }
+        },
+        error: function() {
+
+            alert("ERRORE! C'è stato un problema nel recupero dati Generi");
+            // inizializzo la lista dei generi con un oggetto vuoto
+            if (movieOrTv == APIgenresMovie) {
+                movieGenresList = emptyGenresList;
+            } else {
+                tvGenresList = emptyGenresList;
+            }
+        }
+    }); // end AJAX call
+
+} // fine funzione getGenres()
+
+function getCast(OneItemInfo) {
     // DESCRIZIONE:
     // effettua chiamata AJAX per recuperare i dati relativi al cast
     // in ogni caso (successo/errore) chiama una funzione che crea la card con tutte le info
 
     var creditsPath = ""; // path parziale per la chiamata API
-    var currentId = mainInfo.id; // id del film o serie TV corrente
+    var currentId = OneItemInfo.id; // id del film o serie TV corrente
+    var emptyCastInfo = { // inizializzo a vuoto la proprietà cast
+        'cast': ""
+    };
 
     // costruisco il path per la chiamata API a seconda che sia Movie o TV Series
-    if (mainInfo.hasOwnProperty('title')) {
+    if (OneItemInfo.hasOwnProperty('title')) {
         creditsPath = APIcreditsMovie.replace("id", currentId); // ramo MOVIES
     } else {
         creditsPath = APIcreditsTV.replace("id", currentId); // ramo TV SERIES
@@ -160,20 +224,19 @@ function getCast(mainInfo) {
         },
         method: 'get',
         success: function(castInfo) {
-            createCard(castInfo, mainInfo);
+            createCard(castInfo, OneItemInfo);
         },
         error: function() {
-            // inizializzo la proprietà dell'oggetto che sarebbe dovuto tornarmi nel caso SUCCESS
-            // in modo che la funzione che poi lo manipola visualizzi la stringa "non disponibile"
-            castInfo.cast = "";
             // chiamo comunque la funzione per creare la card, anche se non ho recuperato il cast
-            createCard(castInfo, mainInfo);
+            createCard(emptyCastInfo, OneItemInfo);
+            alert("ERRORE! C'è stato un problema nel recupero dati Cast");
+
         }
     }); // end AJAX call
 
 } // fine getCast()
 
-function createCard(castData, mainData) {
+function createCard(castData, OneItemData) {
     // DESCRIZIONE:
     // questa funzione ha tutti i dati necessari per preparare l'oggetto su cui lavora HANDLEBARS
     // incluso le info sul cast che riceve in ingresso come parametro
@@ -181,43 +244,47 @@ function createCard(castData, mainData) {
 
     var title; // titolo del film o della serie TV
     var original_title; // titolo originale del film o della serie TV
-    var MovieOrTV; // tipologia, distingue se FILM o SERIE TV
+    var ItemType; // tipologia, distingue se FILM o SERIE TV
 
     // distinguo a seconda se è un film o una serie TV
     // solo i film hanno la proprietà 'title', le serie TV hanno invece la proprietà 'name'
-    if (mainData.hasOwnProperty('title')) {
+    if (OneItemData.hasOwnProperty('title')) {
         // ramo MOVIES
-        title = mainData.title;
-        original_title = mainData.original_title;
-        MovieOrTV = "Film";
+        title = OneItemData.title;
+        original_title = OneItemData.original_title;
+        ItemType = "Film";
+
     } else {
         // ramo TV SERIES
-        title = mainData.name;
-        original_title = mainData.original_name;
-        MovieOrTV = "Serie TV";
+        title = OneItemData.name;
+        original_title = OneItemData.original_name;
+        ItemType = "Serie TV";
     }
 
+    // ------------------------- HANDLEBARS ------------------------------------
     // creo un oggetto per HANDLEBARS con i dati da inserire in pagina
     var context = {
+        'id': OneItemData.id,
         'title': title,
         'original-title': original_title,
-        'flag-image': createFlag(mainData.original_language),
-        'stars': createStars(mainData.vote_average),
-        'overview': createOverview(mainData.overview),
-        'img-link': createImgLink(mainData.poster_path),
-        'type': MovieOrTV,
-        'cast': createCast(castData)
+        'type': ItemType,
+        'genres': createGenres(OneItemData),
+        'flag-image': createFlag(OneItemData.original_language),
+        'stars': createStars(OneItemData.vote_average),
+        'cast': createCast(castData),
+        'overview': createOverview(OneItemData.overview),
+        'img-link': createPosterLink(OneItemData.poster_path)
     };
-
     // recupero il codice html dal template HANDLEBARS
     var cardTemplate = $('#card-template').html();
     // compilo il template HANDLEBARS, lui mi restituisce un funzione
     var cardFunction = Handlebars.compile(cardTemplate);
     // chiamo la funzione generata da HANDLEBARS per popolare il template
     var card = cardFunction(context);
+    // ------------------------- HANDLEBARS ------------------------------------
 
     // aggiungo nella mia pagina le cards, ovvero il codice HTML generato da HANDLEBARS
-    if (MovieOrTV == "Film") {
+    if (ItemType == "Film") {
         // aggiungo la card nella sezione Film
         $('#movies-container').append(card);
     } else {
@@ -226,33 +293,86 @@ function createCard(castData, mainData) {
     }
 } // fine funzione createCard()
 
+function createGenres(OneItemData) {
+    // DESCRIZIONE:
+    // identifica quali sono i generi associati al film/serieTV e ritorna una stringa che li contiene
+    // lavora su 2 oggetti: movieGenresList e tvGenresList (ovvero le liste generi)
+    // NOTA: la lista generi ricevuta dall'API è un oggetto con dentro un array,
+    // l'array contiene degli oggetti, ogni oggetto ha 2 proprietà:
+    // "id": codice_genere (è un numero) ,
+    // "name": nome_genere (è una stringa)
+
+    // lista generi su cui lavorare
+    var genresList = {
+        'genres': []
+    };
+
+    //verifico quale lista usare: film o serieTV
+    if (OneItemData.hasOwnProperty('title')) {
+        genresList = movieGenresList; // lavoro sulla lista dei film
+    } else {
+        genresList = tvGenresList; // lavoro sulla lista delle serieTV
+    }
+
+    var genresArray = []; // array con tutti i generi associati a un singolo film/serieTV
+    var genresString = ""; // stringa con tutti i generi associati a un singolo film/serieTV
+    var itemId = OneItemData.id; // id del film/serie corrente
+
+    // scorro tutti i generi (formato numerico) associati al film/serieTV corrente
+    for (var j = 0; j < OneItemData.genre_ids.length; j++) {
+
+        // scorro tutta la lista globale dei generi ricevuta dall'API
+        for (var k = 0; k < genresList.genres.length; k++) {
+
+            // cerco il genere del film/serie all'interno della lista
+            if (genresList.genres[k].id == OneItemData.genre_ids[j]) {
+
+                // costruisco un array con tutti i generi (formato stringa) per il film/serie corrente
+                genresArray.push(genresList.genres[k].name);
+            }
+        } // end for sui generi del film/serie corrente
+    } // end for sulla lista globale generi
+
+    if (genresArray.length > 0) { // ci sono dei generi da visualizzare
+        // unisco gli elementi dell'array in un'unica stringa separata da virgola+spazio
+        genresString = genresArray.join(", ");
+
+    } else { // non ci sono generi da visualizzare
+
+        genresString = notAvailable; // visualizzo la stringa "non disponibile"
+    }
+
+    return genresString;
+
+} // fine funzione createGenres()
+
 function createCast(castList) {
     // DESCRIZIONE:
-    // estrae i dati del cast dall'oggetto in ingresso e li restituisce
-    // sotto forma di stringa
+    // estrae i dati del cast dall'oggetto in ingresso e li restituisce sotto forma di stringa
+
     var castNames = [];
-    var names;
+    var names = ""; // stringa per i nomi che compongono il cast
 
     if (castList.cast.length == 0) {
-        // non ci sono elementi nell'array del cast
-        names = "non disponibile";
+        names = notAvailable; // non ci sono elementi nell'array del cast
     } else {
 
-        // estraggo i primi 5 elementi o quelli che ci sono
-        castList.cast = castList.cast.slice(0, 5);
+        // estraggo i primi 5 elementi o quelli che ci sono se meno di 5
+        castList.cast = castList.cast.slice(0, maxCastLength);
 
         // estraggo solo la proprietà 'name' e la metto in un array
         for (var i = 0; i < castList.cast.length; i++) {
-            castNames[i] = castList.cast[i].name;
+            castNames.push(castList.cast[i].name);
         }
         // unisco gli elementi dell'array in un'unica stringa separata da virgola+spazio
         names = castNames.join(", ");
     }
 
     return names;
-}
 
-function createImgLink(posterLink) {
+} // fine funzione createCast()
+
+function createPosterLink(posterLink) {
     // DESCRIZIONE:
     // crea il path completo per recuperare l'immagine (poster) del film/serie tv
     // gestisce il caso in cui il poster non è disponibile
@@ -322,8 +442,7 @@ function createOverview(text) {
     var textToBeDisplayed; // overview da inserire in pagina
 
     if (text == "") {
-        // non c'è una Overview
-        textToBeDisplayed = "non disponibile";
+        textToBeDisplayed = notAvailable; // non c'è una Overview
     } else {
         textToBeDisplayed = text;
     }

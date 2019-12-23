@@ -25,21 +25,7 @@ button {
     padding: 6px 12px;
 }
 
-#logo-panel h1 {
-    color: red;
-    line-height: 80px;
-    margin-left: 20px;
-}
-
-#logo-panel a {
-    text-decoration: none;
-}
-
-h2 {
-    text-align: center;
-    color: white;
-    background-color: #343534;
-    padding-top: 15px;
+.hidden {
     display: none;
 }
 
@@ -51,6 +37,14 @@ h2 {
     content: '';
     display: table;
     clear: both;
+}
+
+h2 {
+    text-align: center;
+    color: white;
+    background-color: #343534;
+    padding-top: 15px;
+    display: none;
 }
 
 .container {
@@ -79,6 +73,16 @@ h2 {
     float: left;
 }
 
+#logo-panel h1 {
+    color: red;
+    line-height: 80px;
+    margin-left: 20px;
+}
+
+#logo-panel a {
+    text-decoration: none;
+}
+
 .cards-container {
     display: flex;
     justify-content: center;
@@ -98,13 +102,13 @@ h2 {
 }
 
 /* lista con informazioni sul film/serie */
-.info-list {
+.card-info {
     width: 100%;
     height: 100%;
     padding: 20px;
     background-color: #333e49;
     color: white;
-    overflow-y: hidden;
+    overflow-y: auto;
 }
 
 .card ul li {
@@ -130,23 +134,15 @@ i.grayed {
 }
 
 /* immagine poster */
-.poster {
+.card-poster {
     width: 100%;
     height: 100%;
-}
-
-/* riposizionamento immagine poster per coprire tutta la card */
-.overlap {
     position: absolute;
     top: 0;
     left: 0;
 }
 
-/* abilito scrollbar sulla parte testuale */
-.enableScrollbarY {
-    overflow-y: auto;
-}
-
+/* ---------------------------- MEDIA QUERIES ---------------------------- */
 @media screen and (max-width: 564px) {
     #logo-panel, #search-panel {
         float: none;

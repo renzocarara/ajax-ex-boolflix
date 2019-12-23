@@ -30,13 +30,13 @@
     <main>
         <div class="main-container container">
             <section>
-                <h2>Film:</h2>
+                <h2 class="section-header">Film:</h2>
                 <div id="movies-container" class="cards-container">
                     <!-- contenuto generato dinamicamente con i dati recuperati da TMDB -->
                 </div>
             </section>
-            <section id="series-sect">
-                <h2>Serie TV:</h2>
+            <section>
+                <h2 class="section-header">Serie TV:</h2>
                 <div id="series-container" class="cards-container">
                     <!-- contenuto generato dinamicamente con i dati recuperati da TMDB -->
                 </div>
@@ -46,17 +46,18 @@
 
     <script id="card-template" type="text/x-handlebars-template">
         {{!-- template per la creazione delle info estratte da TheMovieDB --}}
-        <div class="card">
-            <ul class="info-list">
+        <div class="card" data-id={{ id }}>
+            <ul class="card-info">
                 <li><strong>Titolo: </strong>{{ title }}</li>
                 <li><strong>Titolo Originale: </strong>{{ original-title }}</li>
                 <li><strong>Tipologia: </strong>{{ type }}</li>
+                <li><strong>Genere: </strong>{{ genres }}</li>
                 <li><strong>Lingua: </strong>{{{ flag-image }}}</li>
                 <li><strong>Voto: </strong>{{{ stars }}}</li>
                 <li><strong>Cast: </strong>{{ cast }}</li>
                 <li><strong>Overview: </strong>{{ overview }}</li>
             </ul>
-            <img class="poster overlap" src="{{ img-link }}" alt="locandina {{ title }}">
+            <img class="card-poster" src="{{ img-link }}" alt="locandina {{ title }}">
         </div>
     </script>
 
