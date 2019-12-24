@@ -30,7 +30,9 @@ var imgUrlSize = 'w342/'; // dimensione dell'immagine
 var imgNotAvailable = "images/no_poster.png"; // immagine di default
 
 var notAvailable = "non disponibile"; // stringa da visualizzare quando non ci sono dati
-var maxCastLength = 5 // numero max di componeneti del cast da visualizzare in pagina
+var maxCastLength = 5; // numero max di componeneti del cast da visualizzare in pagina
+var movie = "movie";
+var tv = "tv";
 
 // elenco lingue per cui è disponibile una bandierina da visualizare
 var availableFlags = ['bg', 'zh', 'cs', 'de', 'dk', 'en', 'es', 'et', 'fi', 'fr', 'gr', 'hr', 'hu', 'in', 'is',
@@ -45,12 +47,11 @@ var movieGenresList = {
 var tvGenresList = {
     'genres': []
 };
-
-// chiamo una funzione che mi valorizza gli oggetti lista generi facendo una chiamata AJAX
-getGenres(APIgenresMovie); // valorizza l'oggetto che contiene la lista dei generi per i film
-getGenres(APIgenresTV); // valorizza l'oggetto che contiene la lista dei generi per le serieTV
-
 // -----------------------------------------------------------------------------
+
+getGenres(APIgenresMovie); // valorizza l'oggetto che contiene la lista dei generi per i film: 'movieGenresList'
+getGenres(APIgenresTV); // valorizza l'oggetto che contiene la lista dei generi per le serieTV: 'tvGenresList'
+
 $(document).ready(function() {
 
     //intercetto click su bottone per la ricerca
@@ -60,7 +61,7 @@ $(document).ready(function() {
 
             handleSearchInput(searchInput); // chiamo una funzione passandogli la stringa da ricercare
         }
-    }); // end evento click su bottone send
+    }); // fine evento click su bottone send
 
     // intercetto pressione ENTER, anzichè click sul bottone, per iniziare ricerca
     $('#search-input').keypress(function(event) {
@@ -68,19 +69,31 @@ $(document).ready(function() {
             var searchInput = $('#search-input').val(); // recupero la stringa da ricercare
             handleSearchInput(searchInput); // chiamo una funzione passandogli la stringa da ricercare
         }
-    }); // end evento keypress tasto ENTER
+    }); // fine evento keypress tasto ENTER
 
     // intercetto e gestisco evento mouseenter su una card
     $('#movies-container, #series-container').on("mouseenter", ".card", function() {
         // nascondo l'immagine poster, rendendo così visibile il testo sottostante
         $(this).find('.card-poster').addClass('hidden');
-    });
+    }); // fine evento mouseenter
 
     // intercetto e gestisco evento mouseleave su una card
     $('#movies-container, #series-container').on("mouseleave", ".card", function() {
         // faccio riapparire l'immagine poster che mi va a coprire il testo
         $(this).find('.card-poster').removeClass('hidden');
-    }); // end eventi mouseenter e mouseleave
+    }); // fine evento mouseleave
+
+    // intercetto evento cambiamento sul selettore genere per i film
+    $('#movie-card-genre select').change(function() {
+        // verifico genere selezionato e visualizzo le card associate a quel genere
+        handleCardGenre(movie);
+    }); // fine evento change
+
+    // intercetto evento cambiamento sul selettore genere per le serieTV
+    $('#series-card-genre select').change(function() {
+        // verifico genere selezionato e visualizzo le card associate a quel genere
+        handleCardGenre(tv);
+    }); // fine evento change
 
 }); // fine document ready
 
@@ -104,6 +117,8 @@ function handleSearchInput(searchString) {
         $('.cards-container').empty();
         // visualizzo le intestazioni per le sezioni Film e Serie TV
         $('.section-header').addClass('visible');
+        // inizializzo i selettori genere al valore "Tutti"
+        $('#movie-card-genre select, #series-card-genre select').val("Tutti");
     }
 } // fine funzione handleSearchInput()
 
@@ -127,8 +142,8 @@ function getMainData(endpoint, query) {
         error: function() {
             alert("ERRORE! C'è stato un problema nell'accesso ai dati");
         }
-    }); // end AJAX call
-} // fine funzione callAJAX()
+    }); // fine chiamata AJAX
+} // fine funzione getMainData()
 
 
 function handleMainData(data, endpoint) {
@@ -141,19 +156,28 @@ function handleMainData(data, endpoint) {
 
         var mainInfo = data.results; // estraggo la parte di risultati che mi interessa
 
+        // visualizzo campo select per selezione tramite genere
+        if (endpoint == APIsearchMovie) {
+            $('#movie-card-genre').removeClass('hidden');
+        } else {
+            $('#series-card-genre').removeClass('hidden');
+        }
+
         // ciclo su tutto l'array composto dai dati base precedentemente recuperati
         // ovvero i film o serie TV trovati
         for (var i = 0; i < mainInfo.length; i++) {
             // per ogni film/serieTV chiamo una funzione per recuperare i dati del cast
             getCast(mainInfo[i]);
-        } // end for
+        }
 
     } else {
 
         if (endpoint == APIsearchMovie) { // non è stato trovato nessun Film
+            $('#movie-card-genre').addClass('hidden'); // nascondo selettore generi
             $('#movies-container').append("Non sono stati trovati Film");
 
         } else { // non è stata trovata nessuna Serie TV
+            $('#series-card-genre').addClass('hidden'); // nascondo selettore generi
             $('#series-container').append("Non sono state trovate Serie TV");
         }
     }
@@ -176,12 +200,14 @@ function getGenres(movieOrTv) {
         method: 'get',
         success: function(genres) {
 
-            // mi salvo la lista dei generi
             if (movieOrTv == APIgenresMovie) {
-                movieGenresList = genres;
+                movieGenresList = genres; // mi salvo la lista dei generi
             } else {
-                tvGenresList = genres;
+                tvGenresList = genres; // mi salvo la lista dei generi
             }
+
+            addGenreOptions(movieOrTv); // creo il selettore dei generi
+
         },
         error: function() {
 
@@ -193,7 +219,7 @@ function getGenres(movieOrTv) {
                 tvGenresList = emptyGenresList;
             }
         }
-    }); // end AJAX call
+    }); // fine chiamata AJAX
 
 } // fine funzione getGenres()
 
@@ -232,9 +258,9 @@ function getCast(OneItemInfo) {
             alert("ERRORE! C'è stato un problema nel recupero dati Cast");
 
         }
-    }); // end AJAX call
+    }); // fine chiamata AJAX
 
-} // fine getCast()
+} // fine funzione getCast()
 
 function createCard(castData, OneItemData) {
     // DESCRIZIONE:
@@ -273,7 +299,8 @@ function createCard(castData, OneItemData) {
         'stars': createStars(OneItemData.vote_average),
         'cast': createCast(castData),
         'overview': createOverview(OneItemData.overview),
-        'img-link': createPosterLink(OneItemData.poster_path)
+        'img-link': createPosterLink(OneItemData.poster_path),
+        'genre-ids': OneItemData.genre_ids.join(" ")
     };
     // recupero il codice html dal template HANDLEBARS
     var cardTemplate = $('#card-template').html();
@@ -448,3 +475,85 @@ function createOverview(text) {
     }
     return textToBeDisplayed;
 }
+
+function addGenreOptions(movieOrTv) {
+    // DESCRIZIONE:
+    // inizializza l'elenco delle option sulla select dei generi
+
+    var selectOption = ""; // codice HTML da inserire in pagina
+
+    if (movieOrTv == APIgenresMovie) { // aggiungo le option nella select per i film
+
+        // ricavo l'elenco dei generi dalla variabile globale movieGenresList
+        for (var i = 0; i < movieGenresList.genres.length; i++) {
+            // creo il codice HTML da aggiungere in pagina
+            selectOption = '<option value="' + movieGenresList.genres[i].name + '">' + movieGenresList.genres[i].name + '</option>';
+
+            // faccio un append della singola option
+            $('#movie-card-genre select').append(selectOption);
+        }
+
+    } else { // aggiungo le option nella select  per le serieTV
+
+        // ricavo l'elenco dei generi dalla variabile globale movieGenresList
+        for (var j = 0; j < tvGenresList.genres.length; j++) {
+            // creo il codice HTML da aggiungere in pagina
+            selectOption = '<option value="' + tvGenresList.genres[j].name + '">' + tvGenresList.genres[j].name + '</option>';
+
+            // faccio un append della singola option
+            $('#series-card-genre select').append(selectOption);
+        }
+    }
+} // fine funzione addGenreOptions()
+
+function handleCardGenre(movieOrTv) {
+    // DESCRIZIONE:
+    // usa l'attributo data-genre associato ad ogni card per verificre se la card ha
+    // il genere che vuol vedere l'utente e nel caso la rende visibile
+    // un film/serieTV può avere più generi associati, ad ogni genere corrisponde un id numerico
+
+    var wholeGenresList; // lista completa dei generi per i filmm/serieTV
+    var whichGenreSelect; // mi indica il selettore di genere, se film o serieTV
+    var whichContainer; // mi indica quale contenitore aggiorno, film o serieTV
+
+    if (movieOrTv == movie) {
+        // elaboro i generi per i film
+        wholeGenresList = movieGenresList;
+        whichGenreSelect = 'movie-card-genre';
+        whichContainer = 'movies-container';
+    } else {
+        // elaboro i generi per le serieTV
+        wholeGenresList = tvGenresList;
+        whichGenreSelect = 'series-card-genre';
+        whichContainer = 'series-container';
+    }
+
+    // mi salvo il genere selezionato dall'utente
+    var genreSelected = $('#' + whichGenreSelect + ' select').val();
+    // parto sempre da una situazione in cui tutte le card non sono visibili
+    $('#' + whichContainer + ' .card').fadeOut();
+
+    // scorro tutte le card con un ciclo 'each' e verifico se ha il genere selezionato
+    $('#' + whichContainer + ' .card').each(function() {
+
+        // mi salvo gli id dei generi associati al singolo movie/serieTV in una stringa
+        var itemGenres = $(this).attr("data-genre");
+        // trasformo la stringa in array di elementi numerici (grazie a .map(number))
+        var itemGenresIds = itemGenres.split(" ").map(Number);
+
+        var genreSelectedId = "";
+        // trasformo il genere selezionato dall'utente da stringa a numero (codice id)
+        for (var i = 0; i < wholeGenresList.genres.length; i++) {
+            if (wholeGenresList.genres[i].name == genreSelected) {
+                genreSelectedId = wholeGenresList.genres[i].id;
+            }
+        }
+
+        // verifico il genere selezionato con i generi associati alla singola card
+        if (itemGenresIds.includes(genreSelectedId) ||
+            (genreSelected == "Tutti")) {
+            // rendo visibili le card che hanno il genere selezionato dall'utente
+            $(this).fadeIn();
+        }
+    }); // end each
+} // fine funzione handleCardGenre()

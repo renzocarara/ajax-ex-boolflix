@@ -30,12 +30,24 @@
     <main>
         <div class="main-container container">
             <section>
+                <div id="movie-card-genre" class="hidden">
+                    <span>Genere film:</span>
+                    <select>
+                        <option value="Tutti">Tutti</option>
+                    </select>
+                </div>
                 <h2 class="section-header">Film:</h2>
                 <div id="movies-container" class="cards-container">
                     <!-- contenuto generato dinamicamente con i dati recuperati da TMDB -->
                 </div>
             </section>
             <section>
+                <div id="series-card-genre" class="hidden">
+                    <span>Genere serie TV:</span>
+                    <select>
+                        <option value="Tutti">Tutti</option>
+                    </select>
+                </div>
                 <h2 class="section-header">Serie TV:</h2>
                 <div id="series-container" class="cards-container">
                     <!-- contenuto generato dinamicamente con i dati recuperati da TMDB -->
@@ -46,7 +58,7 @@
 
     <script id="card-template" type="text/x-handlebars-template">
         {{!-- template per la creazione delle info estratte da TheMovieDB --}}
-        <div class="card" data-id={{ id }}>
+        <div class="card" data-id="{{ id }}" data-genre="{{ genre-ids }}" data-vote="{{ vote }}">
             <ul class="card-info">
                 <li><strong>Titolo: </strong>{{ title }}</li>
                 <li><strong>Titolo Originale: </strong>{{ original-title }}</li>

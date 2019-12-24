@@ -16,7 +16,7 @@ input {
 }
 
 /* elimino bordo sull'input quando ha il focus */
-input:focus {
+input:focus, select:focus {
     outline: none;
 }
 
@@ -63,6 +63,7 @@ h2 {
     background-color: #343534;
     /* (100% viewport) - (altezza header) */
     min-height: calc(100vh - 80px);
+    color: white;
 }
 
 #search-panel {
@@ -140,6 +141,11 @@ i.grayed {
     position: absolute;
     top: 0;
     left: 0;
+}
+
+#movie-card-genre, #series-card-genre {
+    color: white;
+    padding: 5px;
 }
 
 /* ---------------------------- MEDIA QUERIES ---------------------------- */
