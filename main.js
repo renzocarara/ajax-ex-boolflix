@@ -32,7 +32,7 @@ var imgNotAvailable = "images/no_poster.png"; // immagine di default
 var notAvailable = "non disponibile"; // stringa da visualizzare quando non ci sono dati
 var maxCastLength = 5; // numero max di componeneti del cast da visualizzare in pagina
 var movie = "movie";
-var tv = "tv";
+var series = "series";
 
 // elenco lingue per cui è disponibile una bandierina da visualizare
 var availableFlags = ['bg', 'zh', 'cs', 'de', 'dk', 'en', 'es', 'et', 'fi', 'fr', 'gr', 'hr', 'hu', 'in', 'is',
@@ -72,13 +72,13 @@ $(document).ready(function() {
     }); // fine evento keypress tasto ENTER
 
     // intercetto e gestisco evento mouseenter su una card
-    $('#movies-container, #series-container').on("mouseenter", ".card", function() {
+    $('#movie-container, #series-container').on("mouseenter", ".card", function() {
         // nascondo l'immagine poster, rendendo così visibile il testo sottostante
         $(this).find('.card-poster').addClass('hidden');
     }); // fine evento mouseenter
 
     // intercetto e gestisco evento mouseleave su una card
-    $('#movies-container, #series-container').on("mouseleave", ".card", function() {
+    $('#movie-container, #series-container').on("mouseleave", ".card", function() {
         // faccio riapparire l'immagine poster che mi va a coprire il testo
         $(this).find('.card-poster').removeClass('hidden');
     }); // fine evento mouseleave
@@ -86,13 +86,25 @@ $(document).ready(function() {
     // intercetto evento cambiamento sul selettore genere per i film
     $('#movie-card-genre select').change(function() {
         // verifico genere selezionato e visualizzo le card associate a quel genere
-        handleCardGenre(movie);
+        handleSelectors(movie);
     }); // fine evento change
 
     // intercetto evento cambiamento sul selettore genere per le serieTV
     $('#series-card-genre select').change(function() {
         // verifico genere selezionato e visualizzo le card associate a quel genere
-        handleCardGenre(tv);
+        handleSelectors(series);
+    }); // fine evento change
+
+    // intercetto evento cambiamento sul selettore voto per i film
+    $('#movie-card-vote select').change(function() {
+        // verifico genere selezionato e visualizzo le card associate a quel genere
+        handleSelectors(movie);
+    }); // fine evento change
+
+    // intercetto evento cambiamento sul selettore voto per le serieTV
+    $('#series-card-vote select').change(function() {
+        // verifico genere selezionato e visualizzo le card associate a quel genere
+        handleSelectors(series);
     }); // fine evento change
 
 }); // fine document ready
@@ -103,22 +115,31 @@ function handleSearchInput(searchString) {
     // verifica se c'è una stringa da ricercare e nel caso chiama una funzione
     // per effettuare una chiamata AJAX (una per i FILM e una per le SERIE TV)
     // dopodichè resetta il campo di ricerca e svuota il contenitore delle cards
-    // visualizza le intestazioni delle sezioni FILM e SERIE TV
+    // visualizza le intestazioni delle sezioni FILM e SERIE TV e i selettori per genere e voto
 
-    // verifico che la stringa non sia nulla, se la stringa è nulla non faccio niente
+    // verifico che la stringa non sia nulla, se la stringa è nulla avviso l'utente
     if (searchString) {
         // chiamata AJAX per recuperare i dati ricercati tramite API -- CERCO I MOVIES
         getMainData(APIsearchMovie, searchString);
         // chiamata AJAX per recuperare i dati ricercati tramite API -- CERCO TV SERIES
         getMainData(APIsearchTV, searchString);
-        //resetto il campo di input inserendo una stringa vuota
+        // resetto il campo di input inserendo una stringa vuota
         $('#search-input').val("");
         // elimino tutte le cards sulla pagina HTML
         $('.cards-container').empty();
         // visualizzo le intestazioni per le sezioni Film e Serie TV
-        $('.section-header').addClass('visible');
-        // inizializzo i selettori genere al valore "Tutti"
+        $('.section-header').removeClass('hidden');
+        // re-inizializzo i selettori genere e voto
         $('#movie-card-genre select, #series-card-genre select').val("Tutti");
+        $('#movie-card-vote select, #series-card-vote select').val("Qualsiasi");
+        // visualizzo stringa cercata
+        $('#movie-searched-string span, #series-searched-string span').text(searchString);
+        // pulisco  e nascondo le message bar
+        $('#movie-message-bar, #series-message-bar').addClass("hidden");
+
+    } else {
+        // avviso utente di inserire una stringa con un minimo di caratteri....
+        //tbd
     }
 } // fine funzione handleSearchInput()
 
@@ -156,11 +177,14 @@ function handleMainData(data, endpoint) {
 
         var mainInfo = data.results; // estraggo la parte di risultati che mi interessa
 
-        // visualizzo campo select per selezione tramite genere
+        // visualizzo i selettori per genere e voto
         if (endpoint == APIsearchMovie) {
-            $('#movie-card-genre').removeClass('hidden');
+            // visualizzo barra filtri per i film
+            $('#movie-filters-bar').removeClass('hidden').addClass('flex');
+
         } else {
-            $('#series-card-genre').removeClass('hidden');
+            // visualizzo barra filtri per le SerieTv
+            $('#series-filters-bar').removeClass('hidden').addClass('flex');
         }
 
         // ciclo su tutto l'array composto dai dati base precedentemente recuperati
@@ -173,12 +197,16 @@ function handleMainData(data, endpoint) {
     } else {
 
         if (endpoint == APIsearchMovie) { // non è stato trovato nessun Film
-            $('#movie-card-genre').addClass('hidden'); // nascondo selettore generi
-            $('#movies-container').append("Non sono stati trovati Film");
+            // nascondo barra filtri per i film
+            $('#movie-filters-bar').addClass('hidden').removeClass('flex');
+            // visualizzo avviso
+            $('#movie-message-bar').removeClass('hidden').text("Non sono stati trovati Film");
 
         } else { // non è stata trovata nessuna Serie TV
-            $('#series-card-genre').addClass('hidden'); // nascondo selettore generi
-            $('#series-container').append("Non sono state trovate Serie TV");
+            // nascondo barra filtri per le serie TV
+            $('#series-filters-bar').addClass('hidden').removeClass('flex');
+            // visualizzo avviso
+            $('#series-message-bar').removeClass('hidden').text("Non sono state trovate Serie TV");
         }
     }
 } // fine funzione handleMainData()
@@ -297,6 +325,7 @@ function createCard(castData, OneItemData) {
         'genres': createGenres(OneItemData),
         'flag-image': createFlag(OneItemData.original_language),
         'stars': createStars(OneItemData.vote_average),
+        'vote': Math.round(OneItemData.vote_average / 2),
         'cast': createCast(castData),
         'overview': createOverview(OneItemData.overview),
         'img-link': createPosterLink(OneItemData.poster_path),
@@ -313,7 +342,7 @@ function createCard(castData, OneItemData) {
     // aggiungo nella mia pagina le cards, ovvero il codice HTML generato da HANDLEBARS
     if (ItemType == "Film") {
         // aggiungo la card nella sezione Film
-        $('#movies-container').append(card);
+        $('#movie-container').append(card);
     } else {
         // aggiungo la card nella sezione Serie TV
         $('#series-container').append(card);
@@ -481,59 +510,66 @@ function addGenreOptions(movieOrTv) {
     // inizializza l'elenco delle option sulla select dei generi
 
     var selectOption = ""; // codice HTML da inserire in pagina
+    var genresList = ""; // oggetto con la lista globale dei generi
 
-    if (movieOrTv == APIgenresMovie) { // aggiungo le option nella select per i film
+    if (movieOrTv == APIgenresMovie) { // lavoro su i film
 
-        // ricavo l'elenco dei generi dalla variabile globale movieGenresList
-        for (var i = 0; i < movieGenresList.genres.length; i++) {
-            // creo il codice HTML da aggiungere in pagina
-            selectOption = '<option value="' + movieGenresList.genres[i].name + '">' + movieGenresList.genres[i].name + '</option>';
+        genresList = movieGenresList; // oggetto con la lista globale dei generi
+        container = 'movie-card-genre'; // contenitore dove fare l'append
+    } else { // lavoro su le serieTV
 
-            // faccio un append della singola option
-            $('#movie-card-genre select').append(selectOption);
-        }
-
-    } else { // aggiungo le option nella select  per le serieTV
-
-        // ricavo l'elenco dei generi dalla variabile globale movieGenresList
-        for (var j = 0; j < tvGenresList.genres.length; j++) {
-            // creo il codice HTML da aggiungere in pagina
-            selectOption = '<option value="' + tvGenresList.genres[j].name + '">' + tvGenresList.genres[j].name + '</option>';
-
-            // faccio un append della singola option
-            $('#series-card-genre select').append(selectOption);
-        }
+        genresList = tvGenresList; // oggetto con la lista globale dei generi
+        container = 'series-card-genre'; // contenitore dove fare l'append
     }
+
+    // ricavo l'elenco dei generi da inserire
+    for (var i = 0; i < genresList.genres.length; i++) {
+        // creo il codice HTML da aggiungere in pagina
+        selectOption = '<option value="' + genresList.genres[i].name + '">' + genresList.genres[i].name + '</option>';
+
+        // faccio un append della singola option
+        $('#' + container + ' select').append(selectOption);
+    }
+
 } // fine funzione addGenreOptions()
 
-function handleCardGenre(movieOrTv) {
+function handleSelectors(movieOrTv) {
     // DESCRIZIONE:
     // usa l'attributo data-genre associato ad ogni card per verificre se la card ha
-    // il genere che vuol vedere l'utente e nel caso la rende visibile
-    // un film/serieTV può avere più generi associati, ad ogni genere corrisponde un id numerico
+    // il genere che vuol vedere l'utente un film/serieTV può avere più generi associati,
+    // ad ogni genere corrisponde un id numerico
+    // usa l'attributo data-vote associato ad ogni card per verificare il voto di quella card
+    // combina poi la selezione del genere con la selezione del voto e stabilisce se visualizzare la card
+    // o lasciarla nascosta
 
     var wholeGenresList; // lista completa dei generi per i filmm/serieTV
-    var whichGenreSelect; // mi indica il selettore di genere, se film o serieTV
-    var whichContainer; // mi indica quale contenitore aggiorno, film o serieTV
+    // compongo i nomi degli elementi HTML su cui lavorare
+    var whichGenreSelect = movieOrTv + '-card-genre'; // selettore genere
+    var whichVoteSelect = movieOrTv + '-card-vote'; // selettore voto
+    var whichContainer = movieOrTv + '-container'; // contenitore cards
+    var whichMessageBar = movieOrTv + '-message-bar'; // barra messaggi
 
+    // recupero la lista completa dei generi per film o serie TV
     if (movieOrTv == movie) {
-        // elaboro i generi per i film
-        wholeGenresList = movieGenresList;
-        whichGenreSelect = 'movie-card-genre';
-        whichContainer = 'movies-container';
+        wholeGenresList = movieGenresList; // caso film
+        // nascondo la message bar per i film
+        $('#movie-message-bar').addClass("hidden");
     } else {
-        // elaboro i generi per le serieTV
-        wholeGenresList = tvGenresList;
-        whichGenreSelect = 'series-card-genre';
-        whichContainer = 'series-container';
+        wholeGenresList = tvGenresList; // caso serieTV
+        // nascondo la message bar per le serie TV
+        $('#series-message-bar').addClass("hidden");
     }
 
-    // mi salvo il genere selezionato dall'utente
+    // mi salvo il genere e il voto correnti selezionati dall'utente
     var genreSelected = $('#' + whichGenreSelect + ' select').val();
+    var voteSelected = $('#' + whichVoteSelect + ' select').val();
+
     // parto sempre da una situazione in cui tutte le card non sono visibili
     $('#' + whichContainer + ' .card').fadeOut();
+    // $('#' + whichMessageBar + '').text(""); // pulisco la message bar
+    var noneDisplayed = true; // se uguale a 'false' indica che almeno una card viene visualizzata
 
-    // scorro tutte le card con un ciclo 'each' e verifico se ha il genere selezionato
+    // scorro tutte le card con un ciclo 'each'
     $('#' + whichContainer + ' .card').each(function() {
 
         // mi salvo gli id dei generi associati al singolo movie/serieTV in una stringa
@@ -549,11 +585,22 @@ function handleCardGenre(movieOrTv) {
             }
         }
 
+        // mi salvo il voto associato al singolo movie/serieTV
+        var itemVote = $(this).attr("data-vote");
+
         // verifico il genere selezionato con i generi associati alla singola card
-        if (itemGenresIds.includes(genreSelectedId) ||
-            (genreSelected == "Tutti")) {
-            // rendo visibili le card che hanno il genere selezionato dall'utente
+        // verifico il voto selezionato col voto della singola serieTV/film
+        if ((itemGenresIds.includes(genreSelectedId) || (genreSelected == "Tutti")) &&
+            (itemVote >= voteSelected || (voteSelected == "Qualsiasi"))) {
+            // rendo visibili le card che hanno in base al genere e al voto selezionato dall'utente
             $(this).fadeIn();
+            noneDisplayed = false; // almeno una card è stata visualizzata
         }
+
     }); // end each
-} // fine funzione handleCardGenre()
+
+    if (noneDisplayed) {
+        // scrivo un warning nella message bar
+        $('#' + whichMessageBar + '').removeClass("hidden").text("Non ci sono titoli che soddisfano i criteri selezionati");
+    }
+} // fine funzione handleSelectors()

@@ -29,26 +29,81 @@
 
     <main>
         <div class="main-container container">
+            <!-- <div class="overlay"></div> -->
             <section>
-                <div id="movie-card-genre" class="hidden">
-                    <span>Genere film:</span>
-                    <select>
-                        <option value="Tutti">Tutti</option>
-                    </select>
+                <div class="section-header hidden">
+                    <h2>Film:</h2>
                 </div>
-                <h2 class="section-header">Film:</h2>
-                <div id="movies-container" class="cards-container">
+                <div id="movie-message-bar" class="hidden"></div>
+                <div id="movie-filters-bar" class="hidden">
+                    <div class="filters-left-side">
+                        <div id="movie-searched-string"><strong>Hai cercato:</strong><span class="searched-string"></span></div>
+                    </div>
+                    <div class="filters-right-side">
+                        <div id="movie-card-genre">
+                            <span><strong>genere:</strong></span>
+                            <select>
+                                <option value="Tutti">Tutti</option>
+                            </select>
+                        </div>
+                        <div id="movie-card-vote">
+                            <span><strong>voto:</strong></span>
+                            <select>
+                                <option value="Qualsiasi">Qualsiasi</option>
+                                <option value="1">almeno 1 stella</option>
+                                <option value="2">almeno 2 stelle</option>
+                                <option value="3">almeno 3 stelle</option>
+                                <option value="4">almeno 4 stelle</option>
+                                <option value="5">solo 5 stelle</option>
+                            </select>
+                        </div>
+                        <div id="movie-page">
+                            <span><strong>pagina:</strong></span>
+                            <select>
+                                <option value="1">1</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div id="movie-container" class="cards-container">
                     <!-- contenuto generato dinamicamente con i dati recuperati da TMDB -->
                 </div>
             </section>
             <section>
-                <div id="series-card-genre" class="hidden">
-                    <span>Genere serie TV:</span>
-                    <select>
-                        <option value="Tutti">Tutti</option>
-                    </select>
+                <div class="section-header hidden">
+                    <h2>Serie TV:</h2>
                 </div>
-                <h2 class="section-header">Serie TV:</h2>
+                <div id="series-message-bar" class="hidden"></div>
+                <div id="series-filters-bar" class="hidden">
+                    <div class="filters-left-side">
+                        <div id="series-searched-string"><strong>Hai cercato:</strong><span class="searched-string"></span></div>
+                    </div>
+                    <div class="filters-right-side">
+                        <div id="series-card-genre">
+                            <span><strong>genere:</strong></span>
+                            <select>
+                                <option value="Tutti">Tutti</option>
+                            </select>
+                        </div>
+                        <div id="series-card-vote">
+                            <span><strong>voto:</strong></span>
+                            <select>
+                                <option value="Qualsiasi">Qualsiasi</option>
+                                <option value="1">almeno 1 stella</option>
+                                <option value="2">almeno 2 stelle</option>
+                                <option value="3">almeno 3 stelle</option>
+                                <option value="4">almeno 4 stelle</option>
+                                <option value="5">solo 5 stelle</option>
+                            </select>
+                        </div>
+                        <div id="series-page">
+                            <span><strong>pagina:</strong></span>
+                            <select>
+                                <option value="1">1</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
                 <div id="series-container" class="cards-container">
                     <!-- contenuto generato dinamicamente con i dati recuperati da TMDB -->
                 </div>
