@@ -15,15 +15,16 @@
 var APIurl = 'https://api.themoviedb.org/3'; // indirizzo base API TMDB
 var APIsearchMovie = '/search/movie'; // endpoint per ricercare i film
 var APIsearchTV = '/search/tv'; // endpoint per ricercare le serie TV
-// var APImovie = '/movie/movie_id'; // endpoint per richiedere dati di uno specifico film
-// var APItv = '/tv_id'; // endpoint per richiedere dati di una specifica serie TV
 var APIcreditsMovie = '/movie/id/credits'; // endpoint per richiedere il Cast di un film, la stringa 'id' deve essere sostituita con l'id del film
 var APIcreditsTV = '/tv/id/credits'; // endpoint per richiedere Cast di una serieTV , la stringa 'id' deve essere sostituita con l'id della serieTV
 var APIgenresMovie = '/genre/movie/list'; // endpoint per recuperare lista generi per i film
 var APIgenresTV = '/genre/tv/list'; // endpoint per recuperare lista generi per le serie TV
 
 var APIkey = '541a69e2ef5cfc0e4d5d4e563ef1de78'; // la mia chiave per le API TDMB
-var APIlang = 'it-IT'; // parametro lingua, quando costruisco la richiesta all'API
+var APIlangIt = 'it-IT'; // parametro lingua, quando costruisco la richiesta all'API
+var APIlangEn = 'en-US'; // parametro lingua, quando costruisco la richiesta all'API
+var APIlangEs = 'es-ES'; // parametro lingua, quando costruisco la richiesta all'API
+var APIlangFr = 'fr-FR'; // parametro lingua, quando costruisco la richiesta all'API
 
 var imgUrlFixed = 'https://image.tmdb.org/t/p/'; // indirizzo base per le immagini
 var imgUrlSize = 'w342/'; // dimensione dell'immagine
@@ -119,22 +120,39 @@ function handleSearchInput(searchString) {
 
     // verifico che la stringa non sia nulla, se la stringa è nulla avviso l'utente
     if (searchString) {
+
+        // recupero parametro lingua corrente
+        var lang = $('#search-language select').val();
+        switch (lang) {
+            case "EN":
+                lang = APIlangEn;
+                break;
+            case "FR":
+                lang = APIlangFr;
+                break;
+            case "ES":
+                lang = APIlangEs;
+                break;
+            default:
+                lang = APIlangIt;
+        }
         // chiamata AJAX per recuperare i dati ricercati tramite API -- CERCO I MOVIES
-        getMainData(APIsearchMovie, searchString);
+        getMainData(APIsearchMovie, searchString, lang);
         // chiamata AJAX per recuperare i dati ricercati tramite API -- CERCO TV SERIES
-        getMainData(APIsearchTV, searchString);
+        getMainData(APIsearchTV, searchString, lang);
         // resetto il campo di input inserendo una stringa vuota
         $('#search-input').val("");
+        // visualizzo stringa cercata
+        $('#searched-string').removeClass('hidden');
+        $('#searched-string span').text(searchString);
         // elimino tutte le cards sulla pagina HTML
         $('.cards-container').empty();
         // visualizzo le intestazioni per le sezioni Film e Serie TV
-        $('.section-header').removeClass('hidden');
+        $('.section-heading').removeClass('hidden');
         // re-inizializzo i selettori genere e voto
         $('#movie-card-genre select, #series-card-genre select').val("Tutti");
         $('#movie-card-vote select, #series-card-vote select').val("Qualsiasi");
-        // visualizzo stringa cercata
-        $('#movie-searched-string span, #series-searched-string span').text(searchString);
-        // pulisco  e nascondo le message bar
+        // nascondo le message bar
         $('#movie-message-bar, #series-message-bar').addClass("hidden");
 
     } else {
@@ -144,7 +162,7 @@ function handleSearchInput(searchString) {
 } // fine funzione handleSearchInput()
 
 
-function getMainData(endpoint, query) {
+function getMainData(endpoint, query, language) {
     // DESCRIZIONE:
     // chiamata AJAX usando i parametri in ingresso alla funzione
     // per recuperare tutti i dati base del film o serie TV
@@ -154,7 +172,7 @@ function getMainData(endpoint, query) {
         data: {
             'api_key': APIkey,
             'query': query,
-            'language': APIlang
+            'language': language
         },
         method: 'get',
         success: function(response) {
@@ -223,7 +241,7 @@ function getGenres(movieOrTv) {
         url: APIurl + movieOrTv,
         data: {
             'api_key': APIkey,
-            'language': APIlang
+            'language': APIlangIt
         },
         method: 'get',
         success: function(genres) {
@@ -274,7 +292,7 @@ function getCast(OneItemInfo) {
         url: APIurl + creditsPath,
         data: {
             'api_key': APIkey,
-            'language': APIlang
+            'language': APIlangIt
         },
         method: 'get',
         success: function(castInfo) {
@@ -601,6 +619,6 @@ function handleSelectors(movieOrTv) {
 
     if (noneDisplayed) {
         // scrivo un warning nella message bar
-        $('#' + whichMessageBar + '').removeClass("hidden").text("Non ci sono titoli che soddisfano i criteri selezionati");
+        $('#' + whichMessageBar).removeClass("hidden").text("Non ci sono titoli che soddisfano i criteri selezionati");
     }
 } // fine funzione handleSelectors()
