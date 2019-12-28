@@ -135,25 +135,53 @@ input:focus, select:focus {
 
 /* contenitore per la singola "serie TV" o "film" */
 .card {
-    position: relative;
+    /* background-color: transparent; */
     width: 342px;
     height: 513px;
-    margin: 20px;
     border: 1px solid white;
+    perspective: 1000px;
+    margin: 20px;
+}
+
+/* immagine poster */
+.card-poster {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    /* nel caso l'immagine non venga trovata */
+    background-color: #333e49;
+    /* backface-visibility: hidden; */
 }
 
 /* lista con informazioni sul film/serie */
 .card-info {
-    width: 100%;
-    height: 100%;
     padding: 20px;
     background-color: #333e49;
     overflow-y: auto;
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    /* nasconde il retro dell'elemento sulla rotazione */
+    backface-visibility: hidden;
+    transform: rotateY(180deg);
 }
 
 .card ul li {
     list-style-type: none;
     padding-top: 5px;
+}
+
+.flipper {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    transition: transform 0.5s;
+    /* i 2 elementi da flippare mantengono la loro posizione 3D */
+    transform-style: preserve-3d;
+}
+
+.card:hover .flipper {
+    transform: rotateY(180deg);
 }
 
 /* stellina piena per valutazione film/serie */
@@ -172,15 +200,6 @@ i.grayed {
     height: 15px;
     margin-left: 10px;
     vertical-align: text-bottom;
-}
-
-/* immagine poster */
-.card-poster {
-    width: 100%;
-    height: 100%;
-    position: absolute;
-    top: 0;
-    left: 0;
 }
 
 /* barra filtri */

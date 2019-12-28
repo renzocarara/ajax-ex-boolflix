@@ -73,16 +73,16 @@ $(document).ready(function() {
     }); // fine evento keypress tasto ENTER
 
     // intercetto e gestisco evento mouseenter su una card
-    $('#movie-container, #series-container').on("mouseenter", ".card", function() {
-        // nascondo l'immagine poster, rendendo così visibile il testo sottostante
-        $(this).find('.card-poster').addClass('hidden');
-    }); // fine evento mouseenter
-
-    // intercetto e gestisco evento mouseleave su una card
-    $('#movie-container, #series-container').on("mouseleave", ".card", function() {
-        // faccio riapparire l'immagine poster che mi va a coprire il testo
-        $(this).find('.card-poster').removeClass('hidden');
-    }); // fine evento mouseleave
+    // $('#movie-container, #series-container').on("mouseenter", ".card", function() {
+    //     // nascondo l'immagine poster, rendendo così visibile il testo sottostante
+    //     $(this).find('.card-poster').addClass('hidden');
+    // }); // fine evento mouseenter
+    //
+    // // intercetto e gestisco evento mouseleave su una card
+    // $('#movie-container, #series-container').on("mouseleave", ".card", function() {
+    //     // faccio riapparire l'immagine poster che mi va a coprire il testo
+    //     $(this).find('.card-poster').removeClass('hidden');
+    // }); // fine evento mouseleave
 
     // intercetto evento cambiamento sul selettore genere per i film
     $('#movie-card-genre select').change(function() {
