@@ -24,7 +24,7 @@ input:focus, select:focus {
     display: flex;
 }
 
-.clearfix {
+.clearfix::after {
     content: '';
     display: table;
     clear: both;
@@ -38,7 +38,7 @@ input:focus, select:focus {
 
 .header-container {
     width: 100%;
-    height: 80px;
+    /* height: 80px; */
     background-color: black;
     padding: 0 20px;
 }
@@ -131,10 +131,12 @@ input:focus, select:focus {
     display: flex;
     justify-content: center;
     flex-wrap: wrap;
+    /* overflow-x: auto; */
 }
 
 /* contenitore per la singola "serie TV" o "film" */
 .card {
+    /* flex-shrink: 0; */
     /* background-color: transparent; */
     width: 342px;
     height: 513px;
@@ -210,10 +212,11 @@ i.grayed {
     margin-bottom: 15px;
 }
 
-/* filtri: genere, voto, pagina */
+/* filtri: genere, voto e numero risultati epagine */
 #movie-card-genre, #series-card-genre,
 #movie-card-vote, #series-card-vote,
-#movie-page, #series-page {
+#movie-page, #series-page,
+#movie-counter, #series-counter {
     padding: 5px;
     display: inline-block;
     margin-left: 15px;
@@ -221,17 +224,25 @@ i.grayed {
 
 /* barra messaggi */
 #movie-message-bar, #series-message-bar {
-    text-align: center;
-    padding: 10px 5px 20px 5px;
+    padding: 10px 20px;
     background-color: #636663;
 }
 
-/* intestazione della sezione Film/Serie Tv */
-.section-heading h2 {
+.heading-bar {
     border-top: 1px solid gray;
-    text-align: center;
     background-color: #636663;
     padding-top: 15px;
+}
+
+/* intestazione della sezione Film/Serie Tv */
+.heading-bar h2 {
+    display: inline-block;
+    margin-left: 20px;
+}
+
+#movie-results-bar, #series-results-bar {
+    float: right;
+    margin-right: 20px;
 }
 
 /* ----------------------------- MEDIA QUERIES ------------------------------  */
@@ -242,18 +253,17 @@ i.grayed {
         float: none;
     }
 
+    /* riduco lo spazio in altezza per il logo */
     #logo-panel h1 {
         line-height: 50px;
     }
 
-    .header-container {
-        height: 50px;
-    }
-
+    /* riduco lo spazio tra il logo e la search bar che adesso è posizionata al di sotto del logo */
     #search-input {
         margin: 0;
     }
 
+    /* ho più spazio per il campo 'stringa cercata' */
     #searched-string span {
         max-width: 500px;
     }
@@ -264,6 +274,11 @@ i.grayed {
     /* riduco ampiezza campo di input ricerca */
     #search-input {
         width: 195px;
+    }
+
+    /* riduco ampiezza per il campo 'stringa cercata'  */
+    #searched-string span {
+        max-width: 330px;
     }
 }
 
@@ -277,6 +292,11 @@ i.grayed {
     /* riduco ampiezza campo di input ricerca */
     #search-input {
         width: 160px;
+    }
+
+    /* riduco ampiezza per il campo 'stringa cercata'  */
+    #searched-string span {
+        max-width: 260px;
     }
 }
 

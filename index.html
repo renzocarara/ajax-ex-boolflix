@@ -39,10 +39,18 @@
 
     <main>
         <div class="main-container container">
-            <!-- <div class="overlay"></div> -->
+
             <section>
-                <div class="section-heading hidden">
-                    <h2>Film:</h2>
+                <div class="heading-bar hidden clearfix">
+                    <h2>Film</h2>
+                    <div id="movie-results-bar" class="hidden">
+                        <div id="movie-counter"><strong>Trovati: </strong><span></span></div>
+                        <div id="movie-page">
+                            <span><strong>Pag.</strong></span>
+                            <select>
+                            </select>
+                        </div>
+                    </div>
                 </div>
                 <div id="movie-message-bar" class="hidden"></div>
                 <div id="movie-filters-bar" class="hidden">
@@ -63,20 +71,23 @@
                             <option value="5">solo 5 stelle</option>
                         </select>
                     </div>
-                    <div id="movie-page">
-                        <span><strong>Pagina:</strong></span>
-                        <select>
-                            <option value="1">1</option>
-                        </select>
-                    </div>
                 </div>
                 <div id="movie-container" class="cards-container">
                     <!-- contenuto generato dinamicamente con i dati recuperati da TMDB -->
                 </div>
             </section>
+
             <section>
-                <div class="section-heading hidden">
-                    <h2>Serie TV:</h2>
+                <div class="heading-bar hidden clearfix">
+                    <h2>Serie</h2>
+                    <div id="series-results-bar" class="hidden">
+                        <div id="series-counter"><strong>Trovate: </strong><span></span></div>
+                        <div id="series-page">
+                            <span><strong>Pag.</strong></span>
+                            <select>
+                            </select>
+                        </div>
+                    </div>
                 </div>
                 <div id="series-message-bar" class="hidden"></div>
                 <div id="series-filters-bar" class="hidden">
@@ -97,17 +108,12 @@
                             <option value="5">solo 5 stelle</option>
                         </select>
                     </div>
-                    <div id="series-page">
-                        <span><strong>Pagina:</strong></span>
-                        <select>
-                            <option value="1">1</option>
-                        </select>
-                    </div>
                 </div>
                 <div id="series-container" class="cards-container">
                     <!-- contenuto generato dinamicamente con i dati recuperati da TMDB -->
                 </div>
             </section>
+
         </div>
     </main>
 
