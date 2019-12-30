@@ -20,7 +20,6 @@ var APIcreditsTV = '/tv/id/credits'; // endpoint per richiedere Cast di una seri
 var APIgenresMovie = '/genre/movie/list'; // endpoint per recuperare lista generi per i film
 var APIgenresTV = '/genre/tv/list'; // endpoint per recuperare lista generi per le serie TV
 var APIpageDefault = 1; // indica il numero di pagina da richiedere all'API
-
 var APIkey = '541a69e2ef5cfc0e4d5d4e563ef1de78'; // la mia chiave per le API TDMB
 var APIlangIt = 'it-IT'; // parametro lingua, quando costruisco la richiesta all'API
 var APIlangEn = 'en-US'; // parametro lingua, quando costruisco la richiesta all'API
@@ -33,9 +32,9 @@ var imgNotAvailable = "images/no_poster.png"; // immagine di default
 
 var notAvailable = "non disponibile"; // stringa da visualizzare quando non ci sono dati
 var maxCastLength = 5; // numero max di componeneti del cast da visualizzare in pagina
-var maxStars = 5 // numero massimo di stelle per rappresentare il voto
-var movie = "movie";
-var series = "series";
+var maxStars = 5; // numero massimo di stelle per rappresentare il voto
+var movie = "movie"; // discriminante per capire se quale sezione sto lavorando
+var series = "series"; // discriminante per capire se quale sezione sto lavorando
 
 // elenco lingue per cui è disponibile una bandierina da visualizare
 var availableFlags = ['bg', 'zh', 'cs', 'de', 'dk', 'en', 'es', 'et', 'fi', 'fr', 'gr', 'hr', 'hu', 'in', 'is',
@@ -76,40 +75,28 @@ $(document).ready(function() {
         }
     }); // fine evento keypress tasto ENTER
 
-    // intercetto e gestisco evento mouseenter su una card
-    // $('#movie-container, #series-container').on("mouseenter", ".card", function() {
-    //     // nascondo l'immagine poster, rendendo così visibile il testo sottostante
-    //     $(this).find('.card-poster').addClass('hidden');
-    // }); // fine evento mouseenter
-    //
-    // // intercetto e gestisco evento mouseleave su una card
-    // $('#movie-container, #series-container').on("mouseleave", ".card", function() {
-    //     // faccio riapparire l'immagine poster che mi va a coprire il testo
-    //     $(this).find('.card-poster').removeClass('hidden');
-    // }); // fine evento mouseleave
-
     // intercetto evento cambiamento sul selettore genere per i film
     $('#movie-card-genre select').change(function() {
         // verifico genere selezionato e visualizzo le card associate a quel genere
-        handleGenreOrVoteChange(movie);
+        applyGenreAndVoteFilters(movie);
     }); // fine evento change
 
     // intercetto evento cambiamento sul selettore genere per le serieTV
     $('#series-card-genre select').change(function() {
         // verifico genere selezionato e visualizzo le card associate a quel genere
-        handleGenreOrVoteChange(series);
+        applyGenreAndVoteFilters(series);
     }); // fine evento change
 
     // intercetto evento cambiamento sul selettore voto per i film
     $('#movie-card-vote select').change(function() {
         // verifico genere selezionato e visualizzo le card associate a quel genere
-        handleGenreOrVoteChange(movie);
+        applyGenreAndVoteFilters(movie);
     }); // fine evento change
 
     // intercetto evento cambiamento sul selettore voto per le serieTV
     $('#series-card-vote select').change(function() {
         // verifico genere selezionato e visualizzo le card associate a quel genere
-        handleGenreOrVoteChange(series);
+        applyGenreAndVoteFilters(series);
     }); // fine evento change
 
     // intercetto evento cambiamento sul selettore pagina per i film
@@ -161,7 +148,7 @@ function handleSearchInput(searchString, page) {
 
     } else {
         // avviso utente di inserire una stringa con un minimo di caratteri....
-        //tbd
+        // tbd
     }
 } // fine funzione handleSearchInput()
 
@@ -201,10 +188,10 @@ function handleMainData(data, endpoint, isPageChange) {
 
     if (data.total_results > 0) { // ci sono dei risultati da elaborare
 
-        var mainInfo = data.results; // estraggo la parte di risultati che mi interessa
+        var results = data.results; // estraggo la parte di risultati che mi interessa
 
         // se non è una richiesta di 'cambio pagina' ma una 'nuova ricerca', reinizializzo filtri e contatori
-        if (!isPageChange) {
+        if (!isPageChange) { // nuova ricerca
 
             // re-inizializzo i selettori genere e voto
             $('#movie-card-genre select, #series-card-genre select').val("Tutti");
@@ -223,7 +210,7 @@ function handleMainData(data, endpoint, isPageChange) {
                 getCounterAndPages(data, endpoint); // inizializzo n. serie e il selettore pagine
                 $('#series-results-bar').removeClass('hidden');
             }
-        } else {
+        } else { // cambio pagina
             // entro in questo ramo else quando i dati sono stati recuperati per
             // una richiesta di 'cambio pagina' e non una 'nuova ricerca'
             if (endpoint == APIsearchMovie) {
@@ -233,13 +220,14 @@ function handleMainData(data, endpoint, isPageChange) {
                 // elimino tutte le cards delle serieTV sulla pagina HTML
                 $('#series-container').empty();
             }
+
         } // fine if verifica se 'cambio pagina' o 'nuova ricerca'
 
         // ciclo su tutto l'array composto dai dati base precedentemente recuperati
         // ovvero i film o serie TV trovati
-        for (var i = 0; i < mainInfo.length; i++) {
+        for (var i = 0; i < results.length; i++) {
             // per ogni film/serieTV chiamo una funzione per recuperare i dati del cast
-            getCast(mainInfo[i], isPageChange);
+            getCast(results[i], isPageChange, results.length);
         }
 
     } else { // non ci sono risultati da visualizzare
@@ -285,7 +273,6 @@ function getGenres(movieOrTv) {
             }
 
             addGenreOptions(movieOrTv); // creo il selettore dei generi
-
         },
         error: function() {
 
@@ -301,19 +288,19 @@ function getGenres(movieOrTv) {
 
 } // fine funzione getGenres()
 
-function getCast(OneItemInfo, isPageChange) {
+function getCast(cardInfo, isPageChange, numOfCardsToBeDisplayed) {
     // DESCRIZIONE:
     // effettua chiamata AJAX per recuperare i dati relativi al cast
     // in entrambi i casi (success/error) chiama una funzione che crea la card con tutte le info
 
     var creditsPath = ""; // path parziale per la chiamata API
-    var currentId = OneItemInfo.id; // id del film o serie TV corrente
+    var currentId = cardInfo.id; // id del film o serie TV corrente
     var emptyCastInfo = { // inizializzo a vuoto la proprietà cast
         'cast': ""
     };
 
     // costruisco il path per la chiamata API a seconda che sia Movie o TV Series
-    if (OneItemInfo.hasOwnProperty('title')) {
+    if (cardInfo.hasOwnProperty('title')) {
         creditsPath = APIcreditsMovie.replace("id", currentId); // ramo MOVIES
     } else {
         creditsPath = APIcreditsTV.replace("id", currentId); // ramo TV SERIES
@@ -328,11 +315,11 @@ function getCast(OneItemInfo, isPageChange) {
         },
         method: 'get',
         success: function(castInfo) {
-            createCard(castInfo, OneItemInfo, isPageChange);
+            createCard(castInfo, cardInfo, isPageChange, numOfCardsToBeDisplayed);
         },
         error: function() {
             // chiamo comunque la funzione per creare la card, anche se non ho recuperato il cast
-            createCard(emptyCastInfo, OneItemInfo, isPageChange);
+            createCard(emptyCastInfo, cardInfo, isPageChange, numOfCardsToBeDisplayed);
             alert("ERRORE! C'è stato un problema nel recupero dati Cast");
 
         }
@@ -340,48 +327,54 @@ function getCast(OneItemInfo, isPageChange) {
 
 } // fine funzione getCast()
 
-function createCard(castData, OneItemData, isPageChange) {
+function createCard(castData, cardInfo, isPageChange, numOfCardsToBeDisplayed) {
     // DESCRIZIONE:
     // questa funzione ha tutti i dati necessari per preparare l'oggetto su cui lavora HANDLEBARS
     // incluso le info sul cast che riceve in ingresso come parametro
     // chiama diverse altre funzioni che preparano i singoli valori delle proprietà dell'oggetto
+    // nel caso di un 'cambio pagina' verifica se la pagina è completata con tutte le cards e nel
+    // caso chiama una funzione per applicare i filtri correnti sulla pagina
 
     var title; // titolo del film o della serie TV
     var original_title; // titolo originale del film o della serie TV
     var ItemType; // tipologia, distingue se FILM o SERIE TV
+    var numOfCurrentCards = 0; // contatore delle card inserite in pagina
+    var movieOrTv; // identifica se Film o serieTV
 
     // distinguo a seconda se è un film o una serie TV
     // solo i film hanno la proprietà 'title', le serie TV hanno invece la proprietà 'name'
-    if (OneItemData.hasOwnProperty('title')) {
+    if (cardInfo.hasOwnProperty('title')) {
         // ramo Film
-        title = OneItemData.title;
-        original_title = OneItemData.original_title;
+        title = cardInfo.title;
+        original_title = cardInfo.original_title;
         ItemType = "Film";
         movieOrTv = movie;
 
     } else {
         // ramo SerieTV
-        title = OneItemData.name;
-        original_title = OneItemData.original_name;
+        title = cardInfo.name;
+        original_title = cardInfo.original_name;
         ItemType = "Serie TV";
         movieOrTv = series;
     }
 
+    var whichContainer = movieOrTv + '-container'; // contenitore cards
+
     // ------------------------- HANDLEBARS ------------------------------------
     // creo un oggetto per HANDLEBARS con i dati da inserire in pagina
     var context = {
-        'id': OneItemData.id,
+        'id': cardInfo.id,
         'title': title,
         'original-title': original_title,
         'type': ItemType,
-        'genres': createGenres(OneItemData),
-        'flag-image': createFlag(OneItemData.original_language),
-        'stars': createStars(OneItemData.vote_average),
-        'vote': Math.round(OneItemData.vote_average / 2),
+        'genres': createGenres(cardInfo),
+        'flag-image': createFlag(cardInfo.original_language),
+        'stars': createStars(cardInfo.vote_average),
+        'vote': Math.round(cardInfo.vote_average / 2),
         'cast': createCast(castData),
-        'overview': createOverview(OneItemData.overview),
-        'img-link': createPosterLink(OneItemData.poster_path),
-        'genre-ids': OneItemData.genre_ids.join(" ")
+        'overview': createOverview(cardInfo.overview),
+        'img-link': createPosterLink(cardInfo.poster_path),
+        'genre-ids': cardInfo.genre_ids.join(" ")
     };
     // recupero il codice html dal template HANDLEBARS
     var cardTemplate = $('#card-template').html();
@@ -391,27 +384,25 @@ function createCard(castData, OneItemData, isPageChange) {
     var card = cardFunction(context);
     // ------------------------- HANDLEBARS ------------------------------------
 
-    // aggiungo nella mia pagina le cards, ovvero il codice HTML generato da HANDLEBARS
-    if (ItemType == "Film") {
-        // aggiungo la card nella sezione Film
-        $('#movie-container').append(card);
-    } else {
-        // aggiungo la card nella sezione Serie TV
-        $('#series-container').append(card);
+    // aggiungo nella mia pagina la card, ovvero il codice HTML generato da HANDLEBARS
+    $('#' + whichContainer).append(card);
+    // conto quante card ho già inserito
+    numOfCurrentCards = $('#' + whichContainer + ' .card').length;
+
+    // se sto creando una pagina relativa ad un 'cambio pagina',
+    // devo applicare i filtri correnti (genere e voto),
+    // se la pagina è completa, ho scritto l'ultima card, allora chiamo la funzione
+    // per applicare i filtri correnti (genere e voto)
+    if (isPageChange && (numOfCurrentCards == numOfCardsToBeDisplayed)) {
+        // è un cambio pagina, e ho completato l'inserimento di tutte le card sulla pagina,
+        // applico i filtri correnti
+        applyGenreAndVoteFilters(movieOrTv);
     }
 
-    // dopo che ho scritto la card nella pagina HTML, ho 2 casi possibili:
-    // sto creando la prima pagina che è relativa ad una nuova ricerca oppure
-    // sto creando una pagina relativa ad un 'cambio pagina' di una ricerca precedente,
-    // in questo secondo caso devo applicare i filtri correnti (genere e voto),
-    // cioè in base ai filtri decido se la card è da nascondere o meno
-    if (isPageChange) {
-        // è un cambio pagina, applico i filtri correnti
-        applyCurrentFilters(movieOrTv, context);
-    }
+
 } // fine funzione createCard()
 
-function createGenres(OneItemData) {
+function createGenres(cardInfo) {
     // DESCRIZIONE:
     // identifica quali sono i generi associati al film/serieTV e ritorna una stringa che li contiene
     // lavora su 2 oggetti: movieGenresList e tvGenresList (ovvero le liste generi)
@@ -426,7 +417,7 @@ function createGenres(OneItemData) {
     };
 
     //verifico quale lista usare: film o serieTV
-    if (OneItemData.hasOwnProperty('title')) {
+    if (cardInfo.hasOwnProperty('title')) {
         genresList = movieGenresList; // lavoro sulla lista dei film
     } else {
         genresList = tvGenresList; // lavoro sulla lista delle serieTV
@@ -434,16 +425,15 @@ function createGenres(OneItemData) {
 
     var genresArray = []; // array con tutti i generi associati a un singolo film/serieTV
     var genresString = ""; // stringa con tutti i generi associati a un singolo film/serieTV
-    var itemId = OneItemData.id; // id del film/serie corrente
 
     // scorro tutti i generi (formato numerico) associati al film/serieTV corrente
-    for (var j = 0; j < OneItemData.genre_ids.length; j++) {
+    for (var j = 0; j < cardInfo.genre_ids.length; j++) {
 
         // scorro tutta la lista globale dei generi ricevuta dall'API
         for (var k = 0; k < genresList.genres.length; k++) {
 
             // cerco il genere del film/serie all'interno della lista
-            if (genresList.genres[k].id == OneItemData.genre_ids[j]) {
+            if (genresList.genres[k].id == cardInfo.genre_ids[j]) {
 
                 // costruisco un array con tutti i generi (formato stringa) per il film/serie corrente
                 genresArray.push(genresList.genres[k].name);
@@ -596,7 +586,7 @@ function addGenreOptions(movieOrTv) {
 
 } // fine funzione addGenreOptions()
 
-function handleGenreOrVoteChange(movieOrTv) {
+function applyGenreAndVoteFilters(movieOrTv) {
     // DESCRIZIONE:
     // usa l'attributo data-genre associato ad ogni card per verificre se la card ha
     // il genere che vuol vedere l'utente un film/serieTV può avere più generi associati,
@@ -628,9 +618,10 @@ function handleGenreOrVoteChange(movieOrTv) {
     var genreSelected = $('#' + whichGenreSelect + ' select').val();
     var voteSelected = $('#' + whichVoteSelect + ' select').val();
 
-    // parto sempre da una situazione in cui tutte le card non sono visibili
-    $('#' + whichContainer + ' .card').fadeOut();
-    var noneDisplayed = true; // se uguale a 'false' indica che almeno una card viene visualizzata
+    // parto da una situazione in cui tutte le card sono visibili e nascondo
+    // quelle che non soddisfano i criteri dei filtri
+    $('#' + whichContainer + ' .card').fadeIn();
+    var noneDisplayed = true; // se uguale a 'false' indica che almeno una card rimane visualizzata
 
     // scorro tutte le card con un ciclo 'each'
     $('#' + whichContainer + ' .card').each(function() {
@@ -653,19 +644,20 @@ function handleGenreOrVoteChange(movieOrTv) {
 
         // verifico il genere selezionato con i generi associati alla singola card
         // verifico il voto selezionato col voto della singola serieTV/film
-        if ((itemGenresIds.includes(genreSelectedId) || (genreSelected == "Tutti")) &&
-            (itemVote >= voteSelected || (voteSelected == "Qualsiasi"))) {
-            // rendo visibili le card che hanno in base al genere e al voto selezionato dall'utente
-            $(this).fadeIn();
-            noneDisplayed = false; // almeno una card è stata visualizzata
+        if ((!(itemGenresIds.includes(genreSelectedId)) && (genreSelected != "Tutti")) ||
+            (itemVote < voteSelected && (voteSelected != "Qualsiasi"))) {
+            // nascondo le card in base al genere e al voto selezionato dall'utente
+            $(this).fadeOut();
+        } else {
+            noneDisplayed = false; // almeno una card rimane visualizzata
         }
     }); // end each
 
-    if (noneDisplayed) { // nessuna card è stata visualizzata
+    if (noneDisplayed) { // nessuna card è rimasta visualizzata
         // scrivo un avviso nella message bar
         $('#' + whichMessageBar).removeClass("hidden").text("Non ci sono titoli che soddisfano i criteri selezionati");
     }
-} // fine funzione handleGenreOrVoteChange()
+} // fine funzione applyGenreAndVoteFilters()
 
 function getLanguage() {
     // DESCRIZIONE:
@@ -723,64 +715,21 @@ function getCounterAndPages(results, movieOrTv) {
 
 function handlePageRequest(movieOrTv) {
     // DESCRIZIONE:
-    // gestisce la richiesta di cambio pagina a seguito di una variazione del selettore pagina,
-    // di default visualizza un messaggio nella message bar, il messaggio viene poi
-    // nascosto (dalla applyCurrentFilters()) se viene visualizzata almeno una card sulla pagina
+    // gestisce la richiesta di cambio pagina a seguito di una variazione del selettore pagina
 
     var page = 1; // numero di pagina selezionato dall'utente
     var isPageChange = true; // indica che si tratta di una richiesta dati per cambio pagina
     var searchedString = $('#searched-string span').text(); // recupero la stringa che è stata cercata
 
+    // recupero il numero di pagina selezionato
+    page = $('#' + movieOrTv + '-page select').val();
+
     if (movieOrTv == movie) {
-        // recupero il numero di pagina selezionato
-        page = $('#movie-page select').val();
         // chiamata AJAX per recuperare i dati ricercati tramite API -- CERCO I MOVIES
         getMainData(APIsearchMovie, searchedString, getLanguage(), page, isPageChange);
-        // visualizzo la message bar e mostro un avviso, verrà rimosso nel caso ci sia almeno una card che viene visualizzata
-        $('#movie-message-bar').removeClass("hidden").text("Non ci sono titoli che soddisfano i criteri selezionati");
     } else {
-        // recupero il numero di pagina selezionato
-        page = $('#series-page select').val();
         // chiamata AJAX per recuperare i dati ricercati tramite API -- CERCO TV SERIES
         getMainData(APIsearchTV, searchedString, getLanguage(), page, isPageChange);
-        // visualizzo la message bar e mostro un avviso, verrà rimosso nel caso ci sia almeno una card che viene visualizzata
-        $('#series-message-bar').removeClass("hidden").text("Non ci sono titoli che soddisfano i criteri selezionati");
     }
 
 } // fine funzione handlePageRequest()
-
-function applyCurrentFilters(movieOrTv, context) {
-    // DESCRIZIONE:
-    // viene chiamata per applicare i filtri correnti (genere e voto) su di una pagina
-    // richiesta dall'utente (cambio pagina di una ricerca già effettuata)
-    // lavora su una singola card non su tutta la pagina, in base ai filtri correnti
-    // stabilisce se visualizzarla o nasconderla, se in base ai filtri viene visuaizzata
-    // almeno una card allora rimuovo il messaggio di avviso nella message bar
-
-    var whichGenreSelect = movieOrTv + '-card-genre'; // selettore genere
-    var whichVoteSelect = movieOrTv + '-card-vote'; // selettore voto
-    var whichContainer = movieOrTv + '-container'; // contenitore cards
-    var whichMessageBar = movieOrTv + '-message-bar'; // barra messaggi
-
-    // mi salvo il genere e il voto correnti selezionati dall'utente
-    var genreSelected = $('#' + whichGenreSelect + ' select').val();
-    var voteSelected = $('#' + whichVoteSelect + ' select').val();
-
-    // generi associati al film/serie, tra i valori possibili è incluso "non disponibile"
-    var itemGenres = context.genres.split(", ");
-
-    // mi salvo il voto associato al singolo movie/serieTV
-    var itemVote = context.vote; // da 0 a 5
-
-    // verifico il genere selezionato con i generi associati alla singola card
-    // verifico il voto selezionato col voto della singola serieTV/film
-    if (!((itemGenres.includes(genreSelected) || (genreSelected == "Tutti")) &&
-            (itemVote >= voteSelected || (voteSelected == "Qualsiasi")))) {
-        // nascondo la card se non soddisfa i filtri selezionati, individuo la card con l'attributo data-id
-        $('#' + whichContainer + ' .card[data-id="' + context.id + '"]').fadeOut();
-
-    } else { // lascio la card visualizzata
-        $('#' + whichMessageBar).addClass("hidden"); // nascondo la message bar
-    }
-
-} // fine funzione applyCurrentFilters()
