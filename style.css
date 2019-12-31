@@ -185,20 +185,22 @@ main {
 } */
 .cards-container {
     display: flex;
-    justify-content: center;
-    flex-wrap: wrap;
-    /* overflow-x: auto; */
+    justify-content: flex-start;
+    /* flex-wrap: wrap; */
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    overflow-y: hidden;
 }
 
 /* contenitore per la singola "serie TV" o "film" */
 .card {
-    /* flex-shrink: 0; */
+    flex-shrink: 0;
     /* background-color: transparent; */
-    width: 342px;
-    height: 513px;
+    width: 217px;
+    height: 325px;
     border: 1px solid white;
     perspective: 1000px;
-    margin: 20px;
+    margin: 5px;
 }
 
 /* immagine poster */
@@ -213,7 +215,8 @@ main {
 
 /* lista con informazioni sul film/serie */
 .card-info {
-    padding: 20px;
+    font-size: 14px;
+    padding: 10px;
     background-color: #333e49;
     overflow-y: auto;
     position: absolute;
@@ -334,7 +337,7 @@ i.grayed {
     }
 }
 
-@media screen and (max-width: 480px) {
+@media screen and (max-width: 490px) {
 
     /* riduco ampiezza campo di input ricerca */
     #search-input {
@@ -343,6 +346,13 @@ i.grayed {
 
     #searched-string-text {
         max-width: 260px;
+    }
+
+    /* riduco dimensioni della card */
+    .card {
+        height: 432px;
+        width: 285px;
+        padding: 5px;
     }
 }
 
@@ -361,13 +371,6 @@ i.grayed {
 
     #logo-panel h4 {
         display: block;
-    }
-
-    /* riduco dimensioni della card */
-    .card {
-        height: 432px;
-        width: 285px;
-        padding: 5px;
     }
 }
 
