@@ -111,6 +111,18 @@ $(document).ready(function() {
         handlePageRequest(series);
     }); // fine evento change
 
+    // intercetto evento mouseenter sul campo stringa cercata
+    $('#searched-string-text').mouseenter(function() {
+        // visualizzo popup
+        $('#searched-string-popup').removeClass('hidden');
+    }); // fine evento mouseenter
+
+    // intercetto evento mouseleave sul campo stringa cercata
+    $('#searched-string-text').mouseleave(function() {
+        // nascondo popup
+        $('#searched-string-popup').addClass('hidden');
+    }); // fine evento mouseleave
+
 }); // fine document ready
 
 // ---------------------------- FUNCTIONs --------------------------------------
@@ -136,7 +148,8 @@ function handleSearchInput(searchString, page) {
         $('#search-input').val("");
         // visualizzo stringa cercata
         $('#searched-string').removeClass('hidden');
-        $('#searched-string span').text(searchString);
+        $('#searched-string-text, #searched-string-popup').text(searchString);
+
         // elimino tutte le cards sulla pagina HTML
         $('.cards-container').empty();
         // visualizzo l'intestazione per le sezioni Film e Serie TV
@@ -719,7 +732,7 @@ function handlePageRequest(movieOrTv) {
 
     var page = 1; // numero di pagina selezionato dall'utente
     var isPageChange = true; // indica che si tratta di una richiesta dati per cambio pagina
-    var searchedString = $('#searched-string span').text(); // recupero la stringa che è stata cercata
+    var searchedString = $('#searched-string-text').text(); // recupero la stringa che è stata cercata
 
     // recupero il numero di pagina selezionato
     page = $('#' + movieOrTv + '-page select').val();

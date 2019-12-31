@@ -17,6 +17,7 @@
         <div class="header-container container clearfix">
             <div id="logo-panel">
                 <a href="#">
+                    <h4>Boolflix</h4>
                     <h1>Boolflix</h1>
                 </a>
             </div>
@@ -32,7 +33,11 @@
                 </div>
                 <input id="search-input" type="text" placeholder="Cerca qui..." maxlength="100">
                 <div id="search-button"><i class="fas fa-search"></i></div>
-                <div id="searched-string" class="hidden"><strong>Hai cercato: </strong><span></span></div>
+                <div id="searched-string" class="hidden">
+                    <span id="searched-string-heading"><strong>Hai cercato: </strong></span>
+                    <span id=searched-string-text></span>
+                    <div id="searched-string-popup" class="hidden"></div>
+                </div>
             </div>
         </div>
     </header>
