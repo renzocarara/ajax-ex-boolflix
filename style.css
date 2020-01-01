@@ -21,6 +21,13 @@ input, select {
     border-radius: 5px;
     height: 28px;
     background-color: #f2f2f2;
+    padding: 4px;
+}
+
+select option {
+    line-height: 10px;
+    margin: 0;
+    padding: 0;
 }
 
 .hidden {
@@ -82,15 +89,11 @@ header {
     display: inline-block;
 }
 
-#search-language select {
-    padding: 0px 6px;
-}
-
 /* campo per inserire stringa da ricercare */
 #search-input {
     width: 300px;
     margin-top: 12px;
-    padding: 2px 6px;
+    padding-left: 10px;
 }
 
 /* lente d'ingrandimento per avviare ricerca */
@@ -267,12 +270,17 @@ i.grayed {
 
 /* filtri: genere, voto, pagine + numero di risultati trovati */
 #movie-card-genre, #series-card-genre,
-#movie-card-vote, #series-card-vote,
+#movie-card-vote, #series-card-vote {
+    padding: 5px;
+    display: inline-block;
+    margin-left: 15px;
+}
+
 #movie-page, #series-page,
 #movie-counter, #series-counter {
     padding: 5px;
     display: inline-block;
-    margin-left: 15px;
+    margin-left: 0px;
 }
 
 /* barra messaggi */
@@ -298,6 +306,7 @@ i.grayed {
     font-style: italic;
     display: inline-block;
     margin-left: 20px;
+    margin-top: 4px;
 }
 
 .trending-bar {

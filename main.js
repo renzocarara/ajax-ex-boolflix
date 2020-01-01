@@ -35,6 +35,7 @@ var imgNotAvailable = "images/no_poster.png"; // immagine di default
 var notAvailable = "non disponibile"; // stringa da visualizzare quando non ci sono dati
 var maxCastLength = 5; // numero max di componeneti del cast da visualizzare in pagina
 var maxStars = 5; // numero massimo di stelle per rappresentare il voto
+var minSearchLen = 3; // numero minimo di caratteri per una ricerca
 var movie = "movie"; // discriminante per capire se quale sezione sto lavorando
 var series = "series"; // discriminante per capire se quale sezione sto lavorando
 
@@ -146,7 +147,7 @@ function handleSearchInput(searchString, page) {
     var isPageChange = false;
 
     // verifico che la stringa non sia nulla, se la stringa è nulla avviso l'utente
-    if (searchString) {
+    if (searchString.length >= minSearchLen) {
 
         // chiamata AJAX per recuperare i dati ricercati tramite API -- CERCO I MOVIES
         getMainData(APIsearchMovie, searchString, getLanguage(), page, isPageChange);
@@ -167,8 +168,8 @@ function handleSearchInput(searchString, page) {
         $('.main-container section:first-child').addClass('hidden');
 
     } else {
-        // avviso utente di inserire una stringa con un minimo di caratteri....
-        // tbd
+        // avviso utente di inserire una stringa con un minimo di 3 caratteri....
+        $("#search-input").val("").prop("placeholder", "min." + minSearchLen + " caratteri!!");
     }
 } // fine funzione handleSearchInput()
 
