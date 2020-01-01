@@ -16,6 +16,13 @@ input:focus, select:focus {
     outline: none;
 }
 
+input, select {
+    border: none;
+    border-radius: 5px;
+    height: 28px;
+    background-color: #f2f2f2;
+}
+
 .hidden {
     display: none;
 }
@@ -36,7 +43,7 @@ input:focus, select:focus {
     margin: 0 auto;
 }
 
-/* header fisso */
+/* header in posizione fissa */
 header {
     z-index: 2;
     position: fixed;
@@ -60,15 +67,6 @@ header {
     line-height: 80px;
 }
 
-/* logo in verticale */
-#logo-panel h4 {
-    display: none;
-    margin-top: 10px;
-    writing-mode: vertical-rl;
-    color: red;
-    transform: rotate(180deg);
-}
-
 #logo-panel a {
     text-decoration: none;
 }
@@ -79,18 +77,19 @@ header {
 
 /* selettore lingua */
 #search-language {
+    /* vertical-align: text-top; */
     margin-right: 10px;
     display: inline-block;
 }
 
 #search-language select {
-    padding: 2px 6px;
+    padding: 0px 6px;
 }
 
 /* campo per inserire stringa da ricercare */
 #search-input {
     width: 300px;
-    margin-top: 13px;
+    margin-top: 12px;
     padding: 2px 6px;
 }
 
@@ -110,16 +109,15 @@ header {
 /* stringa cercata */
 #searched-string {
     position: relative;
-    margin-bottom: 10px;
+    margin-top: 4px;
 }
 
 /* campo che visualizza la stringa cercata */
 #searched-string-text {
     display: inline-block;
-    max-width: 380px;
+    max-width: 350px;
     background-color: black;
-    color: lightgray;
-    font-style: italic;
+    color: #a7a3a3;
     font-size: 18px;
     font-weight: bold;
     text-transform: uppercase;
@@ -131,26 +129,29 @@ header {
 
 /* popup per stringhe lunghe che non ci stanno nel campo "hai cercato" */
 #searched-string-popup {
+    border: 2px solid red;
+    background-color: #f2f2f2;
     position: absolute;
     left: 20px;
     top: 30px;
     max-width: 250px;
     min-width: 100px;
-    border: 1px solid gray;
-    color: black;
-    background-color: #fff;
-    padding: 5px;
+    color: gray;
+    font-size: 14px;
+    font-weight: bold;
+    padding: 10px;
     border-radius: 5px;
     z-index: 3;
     word-wrap: break-word;
     text-transform: uppercase;
 }
 
-#searched-string-popup:before {
+/* triangolino del popup */
+#searched-string-popup::before {
     content: "";
-    background-color: white;
-    border-top: 1px solid gray;
-    border-left: 1px solid gray;
+    background-color: #f2f2f2;
+    border-top: 2px solid red;
+    border-left: 2px solid red;
     border-radius: 2px 0 0;
     position: absolute;
     top: -9px;
@@ -160,36 +161,28 @@ header {
     height: 15px;
 }
 
-/* offset per il fixed  position header */
+/* offset per il fixed position header */
 main {
     margin-top: 80px;
 }
 
 /* contenitore delle 2 sezioni Film e SerieTV */
 .main-container {
+    border: 1px solid #343534;
     width: 100%;
     background-color: #343534;
-    /* background-image: linear-gradient(#343534 0%, #444343, #636663 100%); */
-    /* background-image: url("https://assets.nflxext.com/ffe/siteui/vlv3/333ac5ff-1679-4182-9fa5-75292728e451/2c6dc3f4-b628-4cc5-b64a-7ebe2c678e3f/IT-it-20191216-popsignuptwoweeks-perspective_alpha_website_large.jpg"); */
     /* (100% viewport) - (altezza header) */
     min-height: calc(100vh - 80px);
 }
 
-/* .overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-image: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.7));
-} */
 .cards-container {
     display: flex;
     justify-content: flex-start;
+    /* scommentare la linea sotto per avere una versione con cards disposte su più righe */
     /* flex-wrap: wrap; */
-    flex-wrap: nowrap;
     overflow-x: auto;
     overflow-y: hidden;
+    padding-left: 15px;
 }
 
 /* contenitore per la singola "serie TV" o "film" */
@@ -232,6 +225,7 @@ main {
     padding-top: 5px;
 }
 
+/* contenitore elementi da flippare */
 .flipper {
     position: relative;
     width: 100%;
@@ -271,7 +265,7 @@ i.grayed {
     margin-bottom: 15px;
 }
 
-/* filtri: genere, voto e numero risultati epagine */
+/* filtri: genere, voto, pagine + numero di risultati trovati */
 #movie-card-genre, #series-card-genre,
 #movie-card-vote, #series-card-vote,
 #movie-page, #series-page,
@@ -287,21 +281,31 @@ i.grayed {
     background-color: #636663;
 }
 
+/* contenitore per numero di titoli trovati e selettore pagine */
+#movie-results-bar, #series-results-bar {
+    float: right;
+    margin-right: 20px;
+}
+
+/* barra di intestazione */
 .heading-bar {
     border-top: 1px solid gray;
     background-color: #636663;
     padding-top: 15px;
 }
 
-/* intestazione della sezione Film/Serie Tv */
 .heading-bar h2 {
+    font-style: italic;
     display: inline-block;
     margin-left: 20px;
 }
 
-#movie-results-bar, #series-results-bar {
-    float: right;
-    margin-right: 20px;
+.trending-bar {
+    text-align: center;
+    border-top: 1px solid gray;
+    /* background-color: #444343; */
+    background-color: #636663;
+    padding: 5px 0;
 }
 
 /* ----------------------------- MEDIA QUERIES ------------------------------  */
@@ -309,7 +313,6 @@ i.grayed {
 /* cellulari uguale 320px, sotto questa dimensione il responsive non è gestito */
 @media screen and (max-width: 655px) {
 
-    /* nascondo logo e ne visualizzo uno più piccolo e in verticale */
     /* riduco ampiezza campo di input ricerca */
     #search-input {
         width: 195px;
@@ -365,12 +368,15 @@ i.grayed {
 }
 
 @media screen and (max-width: 420px) {
-    #logo-panel h1 {
-        display: none;
-    }
 
-    #logo-panel h4 {
-        display: block;
+    /* logo in verticale */
+    #logo-panel h1 {
+        font-size: 18px;
+        line-height: 20px;
+        margin-top: 6px;
+        writing-mode: vertical-rl;
+        color: red;
+        transform: rotate(180deg);
     }
 }
 

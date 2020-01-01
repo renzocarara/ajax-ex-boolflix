@@ -19,6 +19,8 @@ var APIcreditsMovie = '/movie/id/credits'; // endpoint per richiedere il Cast di
 var APIcreditsTV = '/tv/id/credits'; // endpoint per richiedere Cast di una serieTV , la stringa 'id' deve essere sostituita con l'id della serieTV
 var APIgenresMovie = '/genre/movie/list'; // endpoint per recuperare lista generi per i film
 var APIgenresTV = '/genre/tv/list'; // endpoint per recuperare lista generi per le serie TV
+var APItrendingMovie = '/trending/movie/week'; // endpoint per recuperare i film più popolari
+var APItrendingTV = '/trending/tv/week'; // endpoint per recuperare le serieTV più popolari
 var APIpageDefault = 1; // indica il numero di pagina da richiedere all'API
 var APIkey = '541a69e2ef5cfc0e4d5d4e563ef1de78'; // la mia chiave per le API TDMB
 var APIlangIt = 'it-IT'; // parametro lingua, quando costruisco la richiesta all'API
@@ -50,6 +52,8 @@ var tvGenresList = {
     'genres': []
 };
 // -----------------------------------------------------------------------------
+
+getTrendingData(); // recupero i dati dei titoli più popolari
 
 getGenres(APIgenresMovie); // valorizza l'oggetto che contiene la lista dei generi per i film: 'movieGenresList'
 getGenres(APIgenresTV); // valorizza l'oggetto che contiene la lista dei generi per le serieTV: 'tvGenresList'
@@ -113,8 +117,12 @@ $(document).ready(function() {
 
     // intercetto evento mouseenter sul campo stringa cercata
     $('#searched-string-text').mouseenter(function() {
-        // visualizzo popup
-        $('#searched-string-popup').removeClass('hidden');
+        // verifico se la stringa è in overflow
+        var element = document.getElementById('searched-string-text');
+        if (element.offsetWidth < element.scrollWidth) {
+            // il testo è in overflow, visualizzo popup
+            $('#searched-string-popup').removeClass('hidden');
+        }
     }); // fine evento mouseenter
 
     // intercetto evento mouseleave sul campo stringa cercata
@@ -149,15 +157,14 @@ function handleSearchInput(searchString, page) {
         // visualizzo stringa cercata
         $('#searched-string').removeClass('hidden');
         $('#searched-string-text, #searched-string-popup').text(searchString);
-
         // elimino tutte le cards sulla pagina HTML
         $('.cards-container').empty();
-        // visualizzo l'intestazione per le sezioni Film e Serie TV
-        $('.heading-bar').removeClass('hidden');
         // nascondo le message bar
         $('#movie-message-bar, #series-message-bar').addClass("hidden");
         // nascondo le results bar
         $('#movie-results-bar, #series-results-bar').addClass('hidden');
+        // nascondo l'intestazione dei titoli più popolari
+        $('.main-container section:first-child').addClass('hidden');
 
     } else {
         // avviso utente di inserire una stringa con un minimo di caratteri....
@@ -170,8 +177,10 @@ function getMainData(endpoint, query, language, page, isPageChange) {
     // DESCRIZIONE:
     // chiamata AJAX usando i parametri in ingresso alla funzione
     // per recuperare tutti i dati base del film o serie TV
-    // viene chiamata sia nel caso di una nuova ricerca che nel caso
-    // di una richiesta di 'cambio pagina' per una ricerca già in corso
+    // viene chiamata in tre casi:
+    // - per una nuova ricerca
+    // - per una richiesta di 'cambio pagina' per una ricerca già in corso
+    // - inizialmente per recuperare i titoli più popolari
 
     $.ajax({
         url: APIurl + endpoint,
@@ -204,20 +213,20 @@ function handleMainData(data, endpoint, isPageChange) {
         var results = data.results; // estraggo la parte di risultati che mi interessa
 
         // se non è una richiesta di 'cambio pagina' ma una 'nuova ricerca', reinizializzo filtri e contatori
-        if (!isPageChange) { // nuova ricerca
+        if (!isPageChange) { // nuova ricerca o richiesta iniziale dei titoli più popolari
 
             // re-inizializzo i selettori genere e voto
             $('#movie-card-genre select, #series-card-genre select').val("Tutti");
             $('#movie-card-vote select, #series-card-vote select').val("Qualsiasi");
 
-            // visualizzo la barra filtri (selettori genere e voto)
+            // nel cso di nuova ricerca visualizzo la barra filtri (selettori genere e voto)
             // e inizializzo e visualizzo la barra results (n. titoli trovati e selettore pagine)
             if (endpoint == APIsearchMovie) {
                 // visualizzo barra filtri per i film
                 $('#movie-filters-bar').removeClass('hidden').addClass('flex');
                 getCounterAndPages(data, endpoint); // inizializzo n. film e il selettore pagine
                 $('#movie-results-bar').removeClass('hidden');
-            } else {
+            } else if (endpoint == APIsearchTV) {
                 // visualizzo barra filtri per le SerieTv
                 $('#series-filters-bar').removeClass('hidden').addClass('flex');
                 getCounterAndPages(data, endpoint); // inizializzo n. serie e il selettore pagine
@@ -234,7 +243,7 @@ function handleMainData(data, endpoint, isPageChange) {
                 $('#series-container').empty();
             }
 
-        } // fine if verifica se 'cambio pagina' o 'nuova ricerca'
+        } // fine if verifica se 'cambio pagina'
 
         // ciclo su tutto l'array composto dai dati base precedentemente recuperati
         // ovvero i film o serie TV trovati
@@ -746,3 +755,17 @@ function handlePageRequest(movieOrTv) {
     }
 
 } // fine funzione handlePageRequest()
+
+function getTrendingData() {
+    // DESCRIZIONE:
+    // esegue chiamate API per recuperare i dati dei film e delle serieTV più popolari
+
+    // chiamata AJAX per recuperare i dati tramite API
+    getMainData(APItrendingMovie, "", APIlangIt, APIpageDefault, false);
+    // chiamata AJAX per recuperare i dati tramite API
+    getMainData(APItrendingTV, "", APIlangIt, APIpageDefault, false);
+
+    // visualizzo le intestazioni per le sezioni Film e Serie TV
+    $('.heading-bar').removeClass('hidden');
+
+} // fine funzione getTrendingData()
