@@ -149,6 +149,8 @@ function handleSearchInput(searchString, page) {
     // verifico che la stringa non sia nulla, se la stringa è nulla avviso l'utente
     if (searchString.length >= minSearchLen) {
 
+        // set/reset placeholder per il campo ricerca
+        $("#search-input").val("").prop("placeholder", "Cerca qui...");
         // chiamata AJAX per recuperare i dati ricercati tramite API -- CERCO I MOVIES
         getMainData(APIsearchMovie, searchString, getLanguage(), page, isPageChange);
         // chiamata AJAX per recuperare i dati ricercati tramite API -- CERCO TV SERIES
@@ -169,7 +171,7 @@ function handleSearchInput(searchString, page) {
 
     } else {
         // avviso utente di inserire una stringa con un minimo di 3 caratteri....
-        $("#search-input").val("").prop("placeholder", "min." + minSearchLen + " caratteri!!");
+        $("#search-input").val("").prop("placeholder", "Minimo " + minSearchLen + " caratteri!");
     }
 } // fine funzione handleSearchInput()
 
@@ -360,9 +362,11 @@ function createCard(castData, cardInfo, isPageChange, numOfCardsToBeDisplayed) {
 
     var title; // titolo del film o della serie TV
     var original_title; // titolo originale del film o della serie TV
-    var ItemType; // tipologia, distingue se FILM o SERIE TV
+    var itemType; // tipologia, distingue se FILM o SERIE TV
+    var year; // anno di uscita
     var numOfCurrentCards = 0; // contatore delle card inserite in pagina
     var movieOrTv; // identifica se Film o serieTV
+
 
     // distinguo a seconda se è un film o una serie TV
     // solo i film hanno la proprietà 'title', le serie TV hanno invece la proprietà 'name'
@@ -370,14 +374,16 @@ function createCard(castData, cardInfo, isPageChange, numOfCardsToBeDisplayed) {
         // ramo Film
         title = cardInfo.title;
         original_title = cardInfo.original_title;
-        ItemType = "Film";
+        itemType = "Film";
+        release = cardInfo.release_date.slice(0, 4);
         movieOrTv = movie;
 
     } else {
         // ramo SerieTV
         title = cardInfo.name;
         original_title = cardInfo.original_name;
-        ItemType = "Serie TV";
+        itemType = "Serie TV";
+        release = cardInfo.first_air_date.slice(0, 4);
         movieOrTv = series;
     }
 
@@ -389,8 +395,9 @@ function createCard(castData, cardInfo, isPageChange, numOfCardsToBeDisplayed) {
         'id': cardInfo.id,
         'title': title,
         'original-title': original_title,
-        'type': ItemType,
+        'type': itemType,
         'genres': createGenres(cardInfo),
+        'year': release,
         'flag-image': createFlag(cardInfo.original_language),
         'stars': createStars(cardInfo.vote_average),
         'vote': Math.round(cardInfo.vote_average / 2),

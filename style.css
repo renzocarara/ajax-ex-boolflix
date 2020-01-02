@@ -24,12 +24,6 @@ input, select {
     padding: 4px;
 }
 
-select option {
-    line-height: 10px;
-    margin: 0;
-    padding: 0;
-}
-
 .hidden {
     display: none;
 }
@@ -221,6 +215,12 @@ main {
     /* nasconde il retro dell'elemento sulla rotazione */
     backface-visibility: hidden;
     transform: rotateY(180deg);
+}
+
+/* seleziono il primo elemento in lista (il titolo) */
+.card-info li:first-child span {
+    font-weight: bold;
+    color: red;
 }
 
 .card ul li {
