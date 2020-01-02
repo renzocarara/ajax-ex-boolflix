@@ -363,7 +363,6 @@ function createCard(castData, cardInfo, isPageChange, numOfCardsToBeDisplayed) {
     var title; // titolo del film o della serie TV
     var original_title; // titolo originale del film o della serie TV
     var itemType; // tipologia, distingue se FILM o SERIE TV
-    var year; // anno di uscita
     var numOfCurrentCards = 0; // contatore delle card inserite in pagina
     var movieOrTv; // identifica se Film o serieTV
 
@@ -375,7 +374,6 @@ function createCard(castData, cardInfo, isPageChange, numOfCardsToBeDisplayed) {
         title = cardInfo.title;
         original_title = cardInfo.original_title;
         itemType = "Film";
-        release = cardInfo.release_date.slice(0, 4);
         movieOrTv = movie;
 
     } else {
@@ -383,7 +381,6 @@ function createCard(castData, cardInfo, isPageChange, numOfCardsToBeDisplayed) {
         title = cardInfo.name;
         original_title = cardInfo.original_name;
         itemType = "Serie TV";
-        release = cardInfo.first_air_date.slice(0, 4);
         movieOrTv = series;
     }
 
@@ -397,7 +394,7 @@ function createCard(castData, cardInfo, isPageChange, numOfCardsToBeDisplayed) {
         'original-title': original_title,
         'type': itemType,
         'genres': createGenres(cardInfo),
-        'year': release,
+        'year': createYear(cardInfo),
         'flag-image': createFlag(cardInfo.original_language),
         'stars': createStars(cardInfo.vote_average),
         'vote': Math.round(cardInfo.vote_average / 2),
@@ -518,12 +515,12 @@ function createPosterLink(posterLink) {
     var imgUrlVariable = posterLink; // indirizzo specifico dell'immagine richiesta tramite API
     var path = "";
 
-    if (imgUrlVariable != null) {
-        // compongo il path con le parti fisse + il path parziale recuperato con l'API
-        path = imgUrlFixed + imgUrlSize + imgUrlVariable;
-    } else {
+    if (imgUrlVariable == null || imgUrlVariable == "") {
         // non c'è il poster, utilizzo un'immagine di default
         path = imgNotAvailable;
+    } else {
+        // compongo il path con le parti fisse + il path parziale recuperato con l'API
+        path = imgUrlFixed + imgUrlSize + imgUrlVariable;
     }
 
     return path;
@@ -580,13 +577,42 @@ function createOverview(text) {
 
     var textToBeDisplayed; // overview da inserire in pagina
 
-    if (text == "") {
+    if (text == "" || text == null) {
         textToBeDisplayed = notAvailable; // non c'è una Overview
     } else {
         textToBeDisplayed = text;
     }
     return textToBeDisplayed;
 }
+
+function createYear(cardInfo) {
+    // DESCRIZIONE:
+    // estrae l'anno di uscita del film/serieTv, se disponibile
+    // il valore da manipolare è 'null', stringa vuota ("")
+    // o è un valore nel formato stringa "yyyy-mm-dd"
+
+    var release = "";
+
+    if (cardInfo.hasOwnProperty('title')) {
+        // caso Film
+        release = cardInfo.release_date;
+    } else {
+        // caso serie TV
+        release = cardInfo.first_air_date;
+    }
+
+
+    if (release == "" || release == null) {
+        // visualizzo "non disponibile"
+        release = notAvailable;
+    } else {
+        // estraggo solo i primi 4 caratteri, l'anno
+        release = release.slice(0, 4);
+    }
+
+    return release;
+}
+
 
 function addGenreOptions(movieOrTv) {
     // DESCRIZIONE:
