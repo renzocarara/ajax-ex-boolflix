@@ -40,7 +40,7 @@ var movie = "movie"; // discriminante per capire se quale sezione sto lavorando
 var series = "series"; // discriminante per capire se quale sezione sto lavorando
 
 // elenco lingue per cui è disponibile una bandierina da visualizare
-var availableFlags = ['bg', 'zh', 'cs', 'de', 'dk', 'en', 'es', 'et', 'fi', 'fr', 'gr', 'hr', 'hu', 'in', 'is',
+var availableFlags = ['bg', 'zh', 'cs', 'de', 'da', 'en', 'es', 'et', 'fi', 'fr', 'gr', 'hr', 'hu', 'in', 'is',
     'it', 'ja', 'lv', 'nl', 'no', 'pl', 'pt', 'ro', 'ru', 'sl', 'sv', 'tr', 'ua'
 ];
 
@@ -54,7 +54,7 @@ var tvGenresList = {
 };
 // -----------------------------------------------------------------------------
 
-getTrendingData(); // recupero i dati dei titoli più popolari
+handleTrendingData(); // recupero i dati dei titoli più popolari
 
 getGenres(APIgenresMovie); // valorizza l'oggetto che contiene la lista dei generi per i film: 'movieGenresList'
 getGenres(APIgenresTV); // valorizza l'oggetto che contiene la lista dei generi per le serieTV: 'tvGenresList'
@@ -107,13 +107,13 @@ $(document).ready(function() {
     // intercetto evento cambiamento sul selettore pagina per i film
     $('#movie-page').change(function() {
         // gestisco selezione nuova pagina
-        handlePageRequest(movie);
+        handlePageChange(movie);
     }); // fine evento change
 
     // intercetto evento cambiamento sul selettore pagina per le serie
     $('#series-page').change(function() {
         // gestisco selezione nuova pagina
-        handlePageRequest(series);
+        handlePageChange(series);
     }); // fine evento change
 
     // intercetto evento mouseenter sul campo stringa cercata
@@ -227,12 +227,12 @@ function handleMainData(data, endpoint, isPageChange) {
             if (endpoint == APIsearchMovie) {
                 // visualizzo barra filtri per i film
                 $('#movie-filters-bar').removeClass('hidden').addClass('flex');
-                getCounterAndPages(data, endpoint); // inizializzo n. film e il selettore pagine
+                showQtyAndPages(data, endpoint); // inizializzo q.tà film e il selettore pagine
                 $('#movie-results-bar').removeClass('hidden');
             } else if (endpoint == APIsearchTV) {
                 // visualizzo barra filtri per le SerieTv
                 $('#series-filters-bar').removeClass('hidden').addClass('flex');
-                getCounterAndPages(data, endpoint); // inizializzo n. serie e il selettore pagine
+                showQtyAndPages(data, endpoint); // inizializzo q.tà serie e il selettore pagine
                 $('#series-results-bar').removeClass('hidden');
             }
         } else { // cambio pagina
@@ -740,10 +740,10 @@ function getLanguage() {
 
 } // fine funzione getLanguage()
 
-function getCounterAndPages(results, movieOrTv) {
+function showQtyAndPages(results, movieOrTv) {
     // DESCRIZIONE:
     // inizializza l'elenco delle option sul selettore delle pagine
-    // e visualizze il numero totale di titoli trovati
+    // e visualizza il numero totale di titoli trovati
 
     var selectOption = ""; // codice HTML da inserire in pagina
 
@@ -767,9 +767,9 @@ function getCounterAndPages(results, movieOrTv) {
         $('#' + container).append(selectOption);
     }
 
-} // fine funzione addPagesList()
+} // fine funzione showQtyAndPages()
 
-function handlePageRequest(movieOrTv) {
+function handlePageChange(movieOrTv) {
     // DESCRIZIONE:
     // gestisce la richiesta di cambio pagina a seguito di una variazione del selettore pagina
 
@@ -788,9 +788,9 @@ function handlePageRequest(movieOrTv) {
         getMainData(APIsearchTV, searchedString, getLanguage(), page, isPageChange);
     }
 
-} // fine funzione handlePageRequest()
+} // fine funzione handlePageChange()
 
-function getTrendingData() {
+function handleTrendingData() {
     // DESCRIZIONE:
     // esegue chiamate API per recuperare i dati dei film e delle serieTV più popolari
 
@@ -802,4 +802,4 @@ function getTrendingData() {
     // visualizzo le intestazioni per le sezioni Film e Serie TV
     $('.heading-bar').removeClass('hidden');
 
-} // fine funzione getTrendingData()
+} // fine funzione handleTrendingData()
