@@ -36,8 +36,8 @@ var notAvailable = "non disponibile"; // stringa da visualizzare quando non ci s
 var maxCastLength = 5; // numero max di componeneti del cast da visualizzare in pagina
 var maxStars = 5; // numero massimo di stelle per rappresentare il voto
 var minSearchLen = 3; // numero minimo di caratteri per una ricerca
-var movie = "movie"; // discriminante per capire se quale sezione sto lavorando
-var series = "series"; // discriminante per capire se quale sezione sto lavorando
+var movie = "movie"; // discriminante per capire su quale sezione sto lavorando
+var series = "series"; // discriminante per capire su quale sezione sto lavorando
 
 // elenco lingue per cui è disponibile una bandierina da visualizare
 var availableFlags = ['bg', 'zh', 'cs', 'de', 'da', 'en', 'es', 'et', 'fi', 'fr', 'gr', 'hr', 'hu', 'in', 'is',
@@ -222,7 +222,7 @@ function handleMainData(data, endpoint, isPageChange) {
             $('#movie-card-genre select, #series-card-genre select').val("Tutti");
             $('#movie-card-vote select, #series-card-vote select').val("Qualsiasi");
 
-            // nel cso di nuova ricerca visualizzo la barra filtri (selettori genere e voto)
+            // nel caso di nuova ricerca visualizzo la barra filtri (selettori genere e voto)
             // e inizializzo e visualizzo la barra results (n. titoli trovati e selettore pagine)
             if (endpoint == APIsearchMovie) {
                 // visualizzo barra filtri per i film
@@ -299,15 +299,18 @@ function getGenres(movieOrTv) {
 
             addGenreOptions(movieOrTv); // creo il selettore dei generi
         },
-        error: function() {
+        error: function(error) {
 
-            alert("ERRORE! C'è stato un problema nel recupero dati Generi");
+            // alert("ERRORE! C'è stato un problema nel recupero dati Generi");
             // inizializzo la lista dei generi con un oggetto vuoto
             if (movieOrTv == APIgenresMovie) {
                 movieGenresList = emptyGenresList;
             } else {
                 tvGenresList = emptyGenresList;
             }
+            console.log(
+              "ERRORE! C'è stato un problema nel recupero dati Generi", error
+            );
         }
     }); // fine chiamata AJAX
 
@@ -342,10 +345,14 @@ function getCast(cardInfo, isPageChange, numOfCardsToBeDisplayed) {
         success: function(castInfo) {
             createCard(castInfo, cardInfo, isPageChange, numOfCardsToBeDisplayed);
         },
-        error: function() {
+        error: function(error) {
             // chiamo comunque la funzione per creare la card, anche se non ho recuperato il cast
             createCard(emptyCastInfo, cardInfo, isPageChange, numOfCardsToBeDisplayed);
-            alert("ERRORE! C'è stato un problema nel recupero dati Cast");
+            // alert("ERRORE! C'è stato un problema nel recupero dati Cast");
+            console.log(
+              "ERRORE! C'è stato un problema nel recupero dati Cast:",
+              error
+            );
 
         }
     }); // fine chiamata AJAX
